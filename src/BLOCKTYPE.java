@@ -1,0 +1,4 @@
+
+public enum BLOCKTYPE {
+	BEGIN, END, INIT, INPUT, OUTPUT,IF,VALUE
+}
