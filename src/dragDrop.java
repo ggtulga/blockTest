@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -21,7 +22,7 @@ public class dragDrop implements MouseMotionListener,MouseListener {
 		}
 
 		@Override
-		public void mouseClicked(MouseEvent e) {
+		public void mouseClicked(MouseEvent e) {		
 			DrawableBlock temp=(DrawableBlock)e.getSource();
 			if(DrawableBlock.firstBLock==null){
 				if(temp.TYPE!=BLOCKTYPE.END){
@@ -61,9 +62,7 @@ public class dragDrop implements MouseMotionListener,MouseListener {
 					DrawableBlock.firstBLock.setColor(Color.black);
 					DrawableBlock.firstBLock=null;
 				}
-			}
-			//DrawableBLock.firstBlock=
-			
+			}			
 		}
 
 		@Override
@@ -96,6 +95,5 @@ public class dragDrop implements MouseMotionListener,MouseListener {
 		public void mouseReleased(MouseEvent e) {
 			DrawableBlock tempNote=(DrawableBlock) e.getSource();
 			tempNote.setState(0);
-		}
-		
+		}		
 	}

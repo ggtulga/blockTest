@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.io.OutputStream;
+import java.io.DataOutputStream;
 
 import org.python.core.PyList;
 import org.python.core.PyDictionary;
@@ -86,6 +88,14 @@ public class CodeGenerator {
 	 * line number to add one line of code to the script list
 	 */
 	int lineNumber;
+	/**
+	 * stores stdout of the program.
+	 */
+	String output;
+	/**
+	 * stores errors encountered to process blocks.
+	 */
+	String err;
 	
 	private void findLoopBreak(Node p, Node pre) {
 
@@ -338,7 +348,7 @@ public class CodeGenerator {
 					f = tmp.length();
 				
 				substr = tmp.substring(s, f).trim();
-				line.code = substr + " = JOptionPane.showInputDialog('" + substr + "')";
+				line.code = substr + " = int(JOptionPane.showInputDialog('" + substr + "'))";
 				script.add(lineNumber, new LineCode(line));
 				lineNumber++;
 				
@@ -367,30 +377,42 @@ public class CodeGenerator {
 		time = 0;
 		lineNumber = 0;
 		script.clear();
+		output = "";
+		err = "";
 	}
 	
 	private void runPythonScript(String s) {
+		String jarPath = JythonFactory.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		LoggerType logger = (LoggerType) jf.getJythonObject(
-				"LoggerType", "logger.py");
+				"LoggerType", "lib/logger.py");
 		PyList trace = logger.run_script(s); 
 		System.out.println(trace);
 		for (Iterator<PyList> i = trace.iterator(); i.hasNext(); ) {
 			System.out.println(((PyDictionary) i.next().get(1)).get("__user_stdout__"));
 		}
+		
+		output = (String) ((PyDictionary) ((PyList) trace.get(trace.size() - 1)).get(1)).get("__user_stdout__");
 	}
+	
+	
 	
 	public CodeGenerator() {
 		script = new ArrayList<LineCode>();
+		
 	}
 	
 	/**
 	 * 
 	 * @param start DrawableBlock which represents the start node
 	 */
-	public void generateCode(DrawableBlock start) {
+	public boolean generateCode(DrawableBlock start) {
 		init();
 		
 		Map <DrawableBlock, Node> g = new HashMap <DrawableBlock, Node>();
+		
+		if (checkForErrors(start)) {
+			return false;
+		}
 		
 		time = 0;
 		visit(g, start, null, null);
@@ -408,5 +430,15 @@ public class CodeGenerator {
 		
 		System.out.println(s);
 		runPythonScript(s);
+		return true;
 	}
+	
+	public String getOutput() {
+		return output;
+	}
+
+	public String getError() {
+		return err;
+	}
+	
 }

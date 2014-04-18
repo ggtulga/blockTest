@@ -11,9 +11,8 @@ public  class MyDispacher implements KeyEventDispatcher {
 			String tempText = DrawableBlock.CurrentNote.getText();
 			switch ((int) e.getKeyChar()) {
 			case KeyEvent.VK_ENTER:
-				DrawableBlock.CurrentNote.setFont(new Font(Font.MONOSPACED, Font.ITALIC
-						| Font.BOLD, 14));
-				DrawableBlock.CurrentNote = null;
+				
+				DrawableBlock.setCurrentNote(null);
 				break;
 			case KeyEvent.VK_BACK_SPACE:
 				if (tempText.length() > 0)

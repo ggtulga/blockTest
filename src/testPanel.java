@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -7,10 +8,19 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
-
 public class testPanel extends JPanel implements MouseMotionListener,
 		MouseListener {
 
@@ -38,16 +48,72 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		repaint();
 	}
 	
-	public void savePanel(String filePath){
+	public void savePanel(File file){
+		
 		List<DrawableBlock> temp=new ArrayList<>();
 		for(Component c:getComponents()){
 			DrawableBlock block=(DrawableBlock) c;
 			if(!temp.contains(block)){
-				System.out.println("ddddd");
 				block.addToList(temp);
-			}else{System.out.println("cont");}
+			}
 		}
-		convertXML.writeToXML(temp,null);
+		FileOutputStream fout;
+		
+		try {			
+
+            String fname = file.getAbsolutePath();
+
+            if(!fname.endsWith(".block") ) {
+                file = new File(fname + ".block");
+            }
+
+			fout = new FileOutputStream(file);
+			ObjectOutputStream oos = new ObjectOutputStream(fout);
+			try{
+				oos.writeObject(temp);
+				}
+			finally{
+				fout.close();
+		      }
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
+	public void openFile(File file){
+		//filename="d:\\address.txt";
+		removeAll();
+		try{
+		      //use buffering
+		      InputStream filei = new FileInputStream(file);
+		      InputStream buffer = new BufferedInputStream(filei);
+		      ObjectInput input = new ObjectInputStream (buffer);
+		      try{
+		        //deserialize the List
+		    	  List<DrawableBlock> recoveredQuarks = (List<DrawableBlock>)input.readObject();
+		        //display its data
+		        for (DrawableBlock drawableBlock : recoveredQuarks) {
+		        	drawableBlock.initListners();
+		        	drawableBlock.initMenu();
+					add(drawableBlock);
+					System.out.println(drawableBlock);
+				}
+		      }
+		      finally{
+		        input.close();
+		      }
+		    }
+		    catch(ClassNotFoundException ex){
+		      
+		    }
+		    catch(IOException ex){
+		    }
 	}
 	
 	public DrawableBlock getStartBlock() {
@@ -168,6 +234,11 @@ public class testPanel extends JPanel implements MouseMotionListener,
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		if(DrawableBlock.CurrentNote!=null){
+			DrawableBlock.CurrentNote.setFont(new Font(Font.MONOSPACED, Font.ITALIC
+					| Font.BOLD, 14));
+			DrawableBlock.CurrentNote = null;
+		}		
 		if (newBlock != null) {
 			DrawableBlock b;
 			if (newBlock.TYPE == BLOCKTYPE.END)

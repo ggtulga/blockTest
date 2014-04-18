@@ -65,7 +65,7 @@ public class IfBlock   extends DrawableBlock{
 		if(nextTrue!=null) 
 			this.nextTrue.addBefore(this);
 	}
-	@Override
+	/*@Override
 	public String toXMLTags(){
 		String result="<Block type='"+TYPE.getValue()+"', text='"+getText()+"', x="+getLocation().x+", y="+getLocation().y+">";
 		if(getNextTrue()!=null)
@@ -74,7 +74,7 @@ public class IfBlock   extends DrawableBlock{
 			result+="<NextFalseBlock>"+getNextFalse().toXMLTags()+"</NextFalseBlock>";
 		result+="</Block>";		
 		return result;
-	}	
+	}*/	
 	@Override
 	public void addToList(List<DrawableBlock> list){
 		list.add(this);

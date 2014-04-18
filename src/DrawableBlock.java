@@ -14,6 +14,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -24,6 +25,15 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	 */
 	private static final long serialVersionUID = 1L;
 	public static DrawableBlock CurrentNote = null, firstBLock = null;
+	public static void setCurrentNote(DrawableBlock currentNote) {
+		
+		if(CurrentNote != null){
+			DrawableBlock.CurrentNote.setFont(new Font(Font.MONOSPACED, Font.ITALIC
+					| Font.BOLD, 14));
+		}
+		CurrentNote = currentNote;
+	}
+
 	public static KeyListener keyListener;
 	private String Text;
 	private Font textFont;
@@ -77,7 +87,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		this.addMouseListener(new dragDrop());
 		//dispacher=new MyDispatcher();
 	}
-	private void initMenu() {
+	void initMenu() {
 		// Create some menu items for the popup
 		JMenuItem menuFileNew = new JMenuItem("Засварлах");
 		JMenuItem menuLink = new JMenuItem("Устгах");
@@ -155,7 +165,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	public void actionPerformed(ActionEvent e) {
 		switch (e.getActionCommand()) {
 		case "Засварлах":
-			CurrentNote = this;
+			setCurrentNote(this);
 			setFocusable(true);
 			textFont = new Font(Font.MONOSPACED, Font.ITALIC, 14);
 			firstBLock = null;
@@ -190,7 +200,6 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 				firstBLock = null;
 			}
 		default:
-			setFocusable(false);
 			break;
 		}
 	}
@@ -274,13 +283,13 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		}
 		return false;
 	}
-	public String toXMLTags(){
+	/*public String toXMLTags(){
 		String result="<Block type='"+TYPE.getValue()+"', text='"+getText()+"', x="+getLocation().x+", y="+getLocation().y+">";
 		if(getNext()!=null)
 			result+=getNext().toXMLTags();
 		result+="</Block>";		
 		return result;
-	}
+	}*/
 	
 	public void addToList(List<DrawableBlock> list){
 		list.add(this);

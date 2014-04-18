@@ -1,80 +1,148 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class test extends JFrame {
-
 	private static final long serialVersionUID = 1L;
+	private JFileChooser fileChooser;
 	testPanel mainPanel;
-	@SuppressWarnings("deprecation")
+	JList<String> inputList;
+	Map<String,String> inputs;
+	JPanel inputPanel;
+	DefaultListModel<String> inputModel;
+	JTextArea taResult;
+	String currentVariable="";
+	JPanel jpMenuBar;
+	JTextField output;
+	
 	public test() {
 		setLayout(new BorderLayout());
 		JPanel temp=new JPanel(new GridLayout());
 		temp.setSize(1000,1000);
-		//JScrollPane temps=new JScrollPane(temp,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);//new JScrollPane(testField);
 		TitledBorder title = BorderFactory.createTitledBorder(
 				BorderFactory.createLoweredBevelBorder(), " ");
 		title.setTitlePosition(TitledBorder.CENTER);
-		temp.setBorder(title);
+		
 		mainPanel = new testPanel();
 		mainPanel.newPanel();
 		mainPanel.setSize(1500,500);
+		temp.setBorder(title);
 		temp.add(mainPanel);		
-		ToolBar t = new ToolBar();
+		
 		setLayout(new BorderLayout());			
-		add(t, BorderLayout.LINE_START);
-		add(temp, BorderLayout.CENTER);			
-
-		JButton btnSave=new JButton("Save");
+		
+		//init menu
+		fileChooser=new JFileChooser();
+		 FileNameExtensionFilter blockfilter = new FileNameExtensionFilter("block files (*.block)", "block");
+		 fileChooser.setFileFilter(blockfilter);
+		jpMenuBar=new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JButton btnSave=new JButton("Хадгалах");
 		btnSave.setFocusable(false);
 		btnSave.addActionListener(new ActionListener(){
 
 			@Override
-			public void actionPerformed(ActionEvent e) {				
-				save();
-			}
-			
+			public void actionPerformed(ActionEvent e) {	
+
+				int returnVal = fileChooser.showSaveDialog(mainPanel);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+	                File file = fileChooser.getSelectedFile();
+					mainPanel.savePanel(file);
+					repaint();
+	            } 
+			}			
 		});
 		
-		this.add(btnSave,BorderLayout.NORTH);
-		
-		JButton btnCheck=new JButton("Check");
-		btnCheck.setFocusable(false);
-		btnCheck.addActionListener(new ActionListener(){
+		jpMenuBar.add(btnSave);
+		JButton btnOpen=new JButton("Нээх");
+		btnOpen.setFocusable(false);
+		btnOpen.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				int returnVal = fileChooser.showOpenDialog(mainPanel);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+	                File file = fileChooser.getSelectedFile();
+	                mainPanel.openFile(file);
+					repaint();
+	            }
+			}			
+		});
+		jpMenuBar.add(btnOpen);
+		
+		JButton btnCheck=new JButton("Шалгах");
+		btnCheck.setFocusable(false);
+		btnCheck.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
 				// Construct python code
+				DrawableBlock.setCurrentNote(null);
 				CodeGenerator g = new CodeGenerator();
-				g.generateCode(mainPanel.getStartBlock());
+				if (g.generateCode(mainPanel.getStartBlock())) {
+					output.setText(g.getOutput());
+				} else {
+					output.setText(g.getError());
+				}
+				
 			}				
 		});
+		jpMenuBar.add(btnCheck);
+
+		inputs=new HashMap<String, String>();
+		inputPanel=new JPanel(new FlowLayout());
+				
+		this.add(jpMenuBar,BorderLayout.NORTH);
+		
+		// textfield to show outputs
+		output = new JTextField();
+		output.setFocusable(false);
+		output.setEditable(false);
 		
 		
-		this.add(btnCheck, BorderLayout.SOUTH);
-	
+		JSplitPane testt=new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		JSplitPane testp=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		testt.add(testp);
+		
+		testp.add(new ToolBar());
+		testp.add(temp);
+		testt.setDividerLocation(500);
+		//testp.setDividerLocation(80);
+		testt.add(output);
+		this.add(testt, BorderLayout.CENTER);
+		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		this.setVisible(true);
+		this.setSize(800, 600);
+		this.setVisible(true);;
 		this.repaint();		
 	}
 
 	public static void main(String[] args) {
 		new test();
 	}
+	
 	public class ToolBar extends JPanel implements MouseListener {
 
 		private static final long serialVersionUID = 1L;
@@ -144,7 +212,6 @@ public class test extends JFrame {
 		public void mouseReleased(MouseEvent e) {
 
 		}
-
 		@Override
 		public void mouseEntered(MouseEvent e) {
 			DrawableBlock block = (DrawableBlock) e.getSource();
@@ -157,8 +224,5 @@ public class test extends JFrame {
 			if (!block.getColor().equals(Color.red))
 				block.setColor(Color.black);
 		}
-	}
-	public void save(){
-		mainPanel.savePanel("");
 	}
 }
