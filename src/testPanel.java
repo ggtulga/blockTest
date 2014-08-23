@@ -159,11 +159,11 @@ public class testPanel extends JPanel implements MouseMotionListener,
 	if (selectedBlocks.size() > 0) {			
 	    System.out.println(selectedRec);
 	    System.out.println(getBounds());
-	    if (getBounds().contains(selectedRec)&&selectedRec.contains(cursorPoint)) 
-		{	
+	    if (getBounds().contains(selectedRec) &&
+		selectedRec.contains(cursorPoint)) {	
 		    Point p = new Point();
-		    p.x = cursorPoint.x-dragStartPoint.x;
-		    p.y = cursorPoint.y-dragStartPoint.y;
+		    p.x = cursorPoint.x - dragStartPoint.x;
+		    p.y = cursorPoint.y - dragStartPoint.y;
 		    dragStartPoint = cursorPoint;
 		    selectedRec.x = selectedRec.x + p.x;
 		    selectedRec.y = selectedRec.y + p.y;
@@ -207,7 +207,6 @@ public class testPanel extends JPanel implements MouseMotionListener,
     private void deSelectBlocks() {
 
 	for (DrawableBlock block : selectedBlocks) {
-
 	    block.setColor(Color.black);
 	}
 	selectedBlocks.clear();
@@ -220,7 +219,6 @@ public class testPanel extends JPanel implements MouseMotionListener,
     @Override
     public void mouseMoved(MouseEvent e) {
 	cursorPoint = e.getPoint();
-
     }
 
     public void addBlock(DrawableBlock block) {
@@ -238,9 +236,9 @@ public class testPanel extends JPanel implements MouseMotionListener,
 
     @Override
     public void mouseClicked(MouseEvent e) {
-	if(DrawableBlock.currentBlock!=null){
+	if (DrawableBlock.currentBlock != null) {
 	    DrawableBlock.currentBlock.setFont(new Font(Font.MONOSPACED, Font.ITALIC
-						       | Font.BOLD, 14));
+							| Font.BOLD, 14));
 	    DrawableBlock.currentBlock = null;
 	}		
 	if (newBlock != null) {
@@ -273,7 +271,7 @@ public class testPanel extends JPanel implements MouseMotionListener,
 	
     @Override
     public void mousePressed(MouseEvent e) {
-	if(selectedRec!=null){
+	if (selectedRec != null){
 	    dragStartPoint = cursorPoint;
 	    for (DrawableBlock block : selectedBlocks) {
 		block.setTempLocation(e.getLocationOnScreen());
@@ -283,15 +281,12 @@ public class testPanel extends JPanel implements MouseMotionListener,
 	
     @Override
     public void mouseReleased(MouseEvent e) {
-	if (dragStartPoint != null && selectedRec==null) {
+	if (dragStartPoint != null && selectedRec == null) {
 	    selectedRec = new Rectangle(dragStartPoint.x, dragStartPoint.y,
 					cursorPoint.x - dragStartPoint.x, cursorPoint.y
 					- dragStartPoint.y);
 	    selectBlocks();
-	}else {
-			
 	}
-
     }
 	
     @Override
@@ -302,5 +297,4 @@ public class testPanel extends JPanel implements MouseMotionListener,
     @Override
     public void mouseExited(MouseEvent e) {
     }
-
 }
