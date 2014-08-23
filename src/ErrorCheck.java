@@ -81,14 +81,14 @@ public class ErrorCheck {
 
 	private boolean search(DrawableBlock v)
 	{
-		boolean ret = true;
+		if (v == null)
+			return false;
+		
+		boolean ret = false;
 		boolean isValid;
 		String cont = new String(v.getText().trim());
 		String varname;
 		int i;
-
-		if (v == null)
-			return false;
 
 		if (v.TYPE != BLOCKTYPE.END && v.getNext() == null) {
 			err += "Бүх болокууд хоорондоо холбогдсон байх ёстой ба хамгийн сүүлд төгсгөлийн блоктой холбогдоно!\n";
@@ -207,7 +207,15 @@ public class ErrorCheck {
 				}
 			} else
 				ret = true;
-			break;
+			
+			// If block returns here
+			IfBlock block = (IfBlock) v;
+			ret = search(block.getNextTrue());
+			if (ret == false)
+				ret = search(block.getNextFalse());
+			else
+				search(block.getNextFalse());
+			return ret;
 
 		case OUTPUT:
 
@@ -233,6 +241,10 @@ public class ErrorCheck {
 			break;
 		}
 
+		if (ret == false)
+			ret = search(v.getNext());
+		else
+			search(v.getNext());
 		return ret;
 	}
 

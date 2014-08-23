@@ -22,6 +22,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 
 public class test extends JFrame {
 
@@ -32,7 +34,9 @@ public class test extends JFrame {
 	// save, open, check buttons
 	JPanel jpMenuBar;
 	// Show outputs for the code generation
-	JTextField output;
+	//JScrollPane output;
+	JTextArea errArea;
+	JTextArea outArea;
 
 	public test() {
 		setLayout(new BorderLayout());
@@ -95,22 +99,34 @@ public class test extends JFrame {
 				if (checker.checkForErrors(mainTestPanel.getStartBlock()) == false) {
 					CodeGenerator g = new CodeGenerator();
 					if (g.generateCode(mainTestPanel.getStartBlock())) {
-						output.setText(g.getOutput());
+						outArea.setText(g.getOutput());
 					} else {
-						output.setText(g.getError());
+						outArea.setText(g.getError());
 					}
 				} else
-					output.setText(checker.getErrors());
+					errArea.setText(checker.getErrors());
+				
 			}				
 		});
 		jpMenuBar.add(btnCheck);
 
 		this.add(jpMenuBar, BorderLayout.NORTH);
-
+		
+		JTabbedPane tabbedPane = new JTabbedPane();
+		
 		// textfield to show outputs
-		output = new JTextField();
-		output.setFocusable(false);
-		output.setEditable(false);
+		outArea = new JTextArea();
+		outArea.setFocusable(false);
+		outArea.setEditable(false);
+		JScrollPane outputScrollPane = new JScrollPane(outArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,  JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		
+		errArea = new JTextArea();
+		errArea.setFocusable(false);
+		errArea.setEditable(false);
+		JScrollPane errorScrollPane = new JScrollPane(errArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,  JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		
+		tabbedPane.addTab("Алдаа", errorScrollPane);
+		tabbedPane.addTab("Гаралт", outputScrollPane);
 
 		JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		JSplitPane horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -120,9 +136,9 @@ public class test extends JFrame {
 		horizontalSplit.add(mainTestPanel);
 		verticalSplit.setDividerLocation(500);
 
-		verticalSplit.add(output);
 		this.add(verticalSplit, BorderLayout.CENTER);
-
+		
+		verticalSplit.add(tabbedPane);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setSize(800, 600);
 		this.setVisible(true);;
