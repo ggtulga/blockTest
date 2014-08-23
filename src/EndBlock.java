@@ -6,31 +6,31 @@ import java.awt.Point;
 
 public class EndBlock extends DrawableBlock {
 
-    public EndBlock() {
-	super();
-	setText("End");
-	TYPE = BLOCKTYPE.END;
-    }
-    public EndBlock(int i) {
-	super(i);
-	TYPE = BLOCKTYPE.END;
-    }
-    @Override
-    public void draw(Graphics g) {
-	g.setColor(Color.white);
-	g.fillArc(0, 10, 30, 30,90, 180);
-	g.fillArc(this.getWidth() - 30, 10, 25, 30, -90, 180);				
-	g.fillRect(15, 10, getWidth() - 30, 30);
-	g.setColor(getColor());
-	g.drawArc(0, 10, 30, 30,90, 180);
-	g.drawArc(this.getWidth() - 30, 10, 25, 30, -90, 180);
-	g.drawLine(15, 10, getWidth() - 15, 10);
-	g.drawLine(15, 40, getWidth() - 15, 40);
-	g.drawString("Төгсгөл", 10, 30);
-	g.drawLine(getWidth() / 2, 0, getWidth() / 2, 10);
-	int x1[] = {getWidth() / 2 - 5, getWidth() / 2, getWidth() / 2 + 5};
-	int y1[] = {3,10,3};
-	g.fillPolygon(x1, y1, 3);					
-    }
-    
+	public EndBlock() {
+		super();
+		setText("End");
+		TYPE = BLOCKTYPE.END;
+	}
+	public EndBlock(int i) {
+		super(i);
+		TYPE = BLOCKTYPE.END;
+	}
+	@Override
+	public void draw(Graphics g) {
+		g.setColor(Color.white);
+		g.fillArc(0, 10, 30, 30,90, 180);
+		g.fillArc(this.getWidth() - 30, 10, 25, 30, -90, 180);				
+		g.fillRect(15, 10, getWidth() - 30, 30);
+		g.setColor(getColor());
+		g.drawArc(0, 10, 30, 30,90, 180);
+		g.drawArc(this.getWidth() - 30, 10, 25, 30, -90, 180);
+		g.drawLine(15, 10, getWidth() - 15, 10);
+		g.drawLine(15, 40, getWidth() - 15, 40);
+		g.drawString("Төгсгөл", 10, 30);
+		g.drawLine(getWidth() / 2, 0, getWidth() / 2, 10);
+		int x1[] = {getWidth() / 2 - 5, getWidth() / 2, getWidth() / 2 + 5};
+		int y1[] = {3,10,3};
+		g.fillPolygon(x1, y1, 3);					
+	}
+
 }

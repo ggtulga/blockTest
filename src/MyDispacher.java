@@ -4,14 +4,14 @@ import java.awt.event.KeyEvent;
 
 
 public  class MyDispacher implements KeyEventDispatcher {
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent e) {
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent e) {
 		if (DrawableBlock.currentBlock != null && e.getID() == KeyEvent.KEY_FIRST) {
 			System.out.println("++++++");
 			String tempText = DrawableBlock.currentBlock.getText();
 			switch ((int) e.getKeyChar()) {
 			case KeyEvent.VK_ENTER:
-				
+
 				DrawableBlock.setCurrentBlock(null);
 				break;
 			case KeyEvent.VK_BACK_SPACE:
@@ -25,6 +25,6 @@ public  class MyDispacher implements KeyEventDispatcher {
 				break;
 			}
 		}
-        return false;
-    }
+		return false;
+	}
 }
