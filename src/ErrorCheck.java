@@ -16,10 +16,10 @@ public class ErrorCheck {
 			return true;
 
 		if (isDeclared == true) {
-			// if it's a number or string, consider it as declared
+			// if it's a number or string, consider it as declared 
 			if (varname.matches("^[0-9]+") == true)
 				return true;
-			if (varname.matches("^{\"|\'}\\S+{\"|\'}$") == true)
+			if (varname.matches("^(\\\"|\\')\\p{Print}+(\\\"|\\')$") == true)
 				return true;
 		}
 
@@ -37,16 +37,19 @@ public class ErrorCheck {
 
 		// if varname is okay, then check for declarations
 		if (ret == true) {
-			if (isDeclared == true) {
-				if (varname.indexOf('[') != -1)
-					varname = varname.substring(0, varname.indexOf('['));
+			
+			if (varname.indexOf('[') != -1)
+				varname = varname.substring(0, varname.indexOf('['));
 
-				if (vars.contains(varname) == false) {
-					err += varname + "хувьсагч зарлагдаагүй байна!\n";
+			if (vars.contains(varname) == false) {
+				if (isDeclared == true) {
+					err += varname + " хувьсагч зарлагдаагүй байна!\n";
 					ret = false;
 				}
+			} else if (isDeclared == false) {
+					err += varname + " хувьсагч аль хэдийн зарлагдсан байна!\n";
+					ret = false;
 			}
-
 		}
 
 		return ret;

@@ -217,22 +217,33 @@ public class CodeGenerator {
 
 		if (v.TYPE == BLOCKTYPE.INIT) {
 			// Let's do a nice thing by separating declarations by commas
-			int s = 0, f = 0;
+			int s = 0, f = 0, x, y, size;
+			boolean foundArray = false;			
 			String c = v.getText(), tmp = "";
+			HashMap<String, Integer> arrays = new HashMap<String, Integer>();
 			while (true) {
 				f = c.indexOf(',', f);
 				if (f == -1)
 					f = c.length();
 
-				tmp = c.substring(s, f);
-				// if it's not the first declaration
-				if (s != 0)
-					tmp = "," + tmp;
-
-				if (tmp.indexOf('=') == -1) 
-					line.code += tmp + "=None";
-				else
-					line.code += tmp;
+				tmp = c.substring(s, f).trim();
+				
+				x = tmp.indexOf('[');
+				if (x != -1) {
+					// it's an array
+					foundArray = true;
+					y = tmp.indexOf(']', x + 1);
+					size = Integer.parseInt(tmp.substring(x + 1, y));
+					arrays.put(tmp.substring(0, x), size);
+				}
+//				// if it's not the first declaration
+//				if (s != 0)
+//					tmp = "," + tmp;
+//
+//				if (tmp.indexOf('=') == -1) 
+//					line.code += tmp + "=None";
+//				else
+//					line.code += tmp;
 
 
 				if (f == c.length())
@@ -240,6 +251,25 @@ public class CodeGenerator {
 
 				f++;
 				s = f; // new start
+			}
+			// if there's no array, write empty code
+			if (foundArray == false)
+				line.code += "None";
+			else {
+				String rvalue = "=";
+				Iterator i = arrays.entrySet().iterator();
+				Map.Entry<String, Integer> pair;
+				while (true) {
+					pair = (Map.Entry<String, Integer>) i.next();
+					line.code += pair.getKey();
+					rvalue += "[None]*" + pair.getValue();
+					if (i.hasNext()) {
+						line.code += ",";
+						rvalue += ",";
+					} else
+						break;
+				}
+				line.code += rvalue;
 			}
 		} else 	if (v.TYPE == BLOCKTYPE.OUTPUT) {
 			line.code = "print(" + v.getText() + ")";
