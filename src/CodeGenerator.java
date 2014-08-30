@@ -414,7 +414,7 @@ public class CodeGenerator {
 	private void runPythonScript(String s) {
 		String jarPath = JythonFactory.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		LoggerType logger = (LoggerType) jf.getJythonObject(
-				"LoggerType", "lib/logger.py");
+				"LoggerType", "logger.py");
 		PyList trace = logger.run_script(s); 
 		System.out.println(trace);
 		for (Iterator<PyList> i = trace.iterator(); i.hasNext(); ) {

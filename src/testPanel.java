@@ -45,6 +45,7 @@ MouseListener {
 		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 		manager.addKeyEventDispatcher(new MyDispacher());
 		this.newPanel();
+		this.setSize(1000, 1000);
 	}
 
 	public void newPanel(){

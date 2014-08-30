@@ -19,7 +19,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JScrollPane;
@@ -41,16 +40,20 @@ public class test extends JFrame {
 	public test() {
 		setLayout(new BorderLayout());
 
-		JPanel mainPanel = new JPanel(new GridLayout());
-
+		//JPanel mainPanel = new JPanel(new GridLayout());
+		
 		TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createLoweredBevelBorder(),
-				" ");
-		title.setTitlePosition(TitledBorder.CENTER);
-		mainPanel.setBorder(title);
-
+				"шинэ талбар");
+		//title.setTitlePosition(TitledBorder.CENTER);
+		//mainPanel.setBorder(title);
+		
 		mainTestPanel = new testPanel();
-		mainPanel.add(mainTestPanel);		
-
+		mainTestPanel.setBorder(title);
+		//mainPanel.add(mainTestPanel);
+		JScrollPane mainScroll = new JScrollPane(mainTestPanel,
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		
 		//init menu
 		fileChooser = new JFileChooser();
 		FileNameExtensionFilter blockFilter = new FileNameExtensionFilter("block files (*.block)", "block");
@@ -61,7 +64,7 @@ public class test extends JFrame {
 
 		JButton btnSave = new JButton("Хадгалах");
 		btnSave.setFocusable(false);
-		btnSave.addActionListener(new ActionListener(){
+		btnSave.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {	
 				int returnVal = fileChooser.showSaveDialog(mainTestPanel);
@@ -76,7 +79,7 @@ public class test extends JFrame {
 
 		JButton btnOpen = new JButton("Нээх");
 		btnOpen.setFocusable(false);
-		btnOpen.addActionListener(new ActionListener(){
+		btnOpen.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int returnVal = fileChooser.showOpenDialog(mainTestPanel);
@@ -91,7 +94,7 @@ public class test extends JFrame {
 
 		JButton btnCheck = new JButton("Шалгах");
 		btnCheck.setFocusable(false);
-		btnCheck.addActionListener(new ActionListener(){
+		btnCheck.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Construct python code
 				//DrawableBlock.setCurrentBlock(null);
@@ -118,12 +121,18 @@ public class test extends JFrame {
 		outArea = new JTextArea();
 		outArea.setFocusable(false);
 		outArea.setEditable(false);
-		JScrollPane outputScrollPane = new JScrollPane(outArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,  JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		JScrollPane outputScrollPane = new JScrollPane(outArea, 
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,  
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
 		errArea = new JTextArea();
 		errArea.setFocusable(false);
 		errArea.setEditable(false);
-		JScrollPane errorScrollPane = new JScrollPane(errArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,  JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		errArea.setForeground(Color.red);
+		
+		JScrollPane errorScrollPane = new JScrollPane(errArea, 
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
 		tabbedPane.addTab("Алдаа", errorScrollPane);
 		tabbedPane.addTab("Гаралт", outputScrollPane);
@@ -133,7 +142,7 @@ public class test extends JFrame {
 		verticalSplit.add(horizontalSplit);
 
 		horizontalSplit.add(new ToolBar());
-		horizontalSplit.add(mainTestPanel);
+		horizontalSplit.add(mainScroll);
 		verticalSplit.setDividerLocation(500);
 
 		this.add(verticalSplit, BorderLayout.CENTER);

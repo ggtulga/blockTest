@@ -17,7 +17,8 @@ public class JythonFactory {
 
 		Object javaInt = null;
 		PythonInterpreter interpreter = new PythonInterpreter();
-		interpreter.execfile(pathToJythonModule);
+		
+		interpreter.execfile(JythonFactory.class.getResourceAsStream(pathToJythonModule));
 		String tempName = pathToJythonModule.substring(pathToJythonModule.lastIndexOf("/")+1);
 		tempName = tempName.substring(0, tempName.indexOf("."));
 		System.out.println(tempName);

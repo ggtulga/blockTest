@@ -93,11 +93,6 @@ public class ErrorCheck {
 		String varname;
 		int i;
 
-		if (v.TYPE != BLOCKTYPE.END && v.getNext() == null) {
-			err += "Бүх болокууд хоорондоо холбогдсон байх ёстой ба хамгийн сүүлд төгсгөлийн блоктой холбогдоно!\n";
-			return true;
-		}
-
 		if (cont == "") {
 			err += "Блок хоосон байж болохгүй!\n";
 			ret = true;
@@ -197,7 +192,7 @@ public class ErrorCheck {
 						break;
 				}
 
-				String[] names = cont.split("<=|>=|==|<|>|!=|+|-|*|/|%");
+				String[] names = cont.split("<=|>=|==|<|>|!=|\\+|\\-|\\*|/|%");
 				Pattern p = Pattern.compile("=|<|>|!");
 
 				for (i = 0; i < names.length; i++) {
@@ -234,7 +229,7 @@ public class ErrorCheck {
 
 		case VALUE:
 			if (checkString(cont) == true) {
-				String[] vars = cont.split("=|+|-|*|/|%");
+				String[] vars = cont.split("=|\\+|\\-|\\*|/|%");
 				for (i = 0; i < vars.length; i++)
 					if (checkVarname(vars[i], true) == false)
 						ret = true;
@@ -242,6 +237,12 @@ public class ErrorCheck {
 			} else
 				ret = true;
 			break;
+		}
+		
+		// it's safe to check here. Because if blocks don't reach here.
+		if (v.TYPE != BLOCKTYPE.END && v.getNext() == null) {
+			err += "Бүх болокууд хоорондоо холбогдсон байх ёстой ба хамгийн сүүлд төгсгөлийн блоктой холбогдоно!\n";
+			return true;
 		}
 
 		if (ret == false)
