@@ -193,7 +193,7 @@ public class test extends JFrame {
 
 				temp.add(t);
 			}
-			System.out.println(temp.getHeight());
+
 			temp.setSize(100, 1000);
 			TitledBorder title = BorderFactory.createTitledBorder(
 					BorderFactory.createLoweredBevelBorder(), "Блокууд");

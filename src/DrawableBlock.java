@@ -4,12 +4,9 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -267,7 +264,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		preColor = color;
 	}
 
-	public boolean dragBlock(Point p){		
+	public boolean dragBlock(Point p){
 		Point temp = new Point(p);
 		if(getTempLocation() == null)	setTempLocation(temp);
 		else {
@@ -280,7 +277,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 			if(!(p.x < 0 || p.y < 0 ||
 					(p.x + getWidth()) > c.getWidth() || (p.y + getHeight()) > c.getHeight())) {
 				setLocation(p);
-				repaint();		
+				//repaint();		
 			}
 			return true;
 		}
@@ -296,9 +293,9 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 
 	public void addToList(List<DrawableBlock> list){
 		list.add(this);
-		System.out.println("in");
+		//System.out.println("in");
 		if(getNext() != null && !list.contains(getNext())){
-			System.out.println("inn");
+			//System.out.println("inn");
 			getNext().addToList(list);
 		}
 	}

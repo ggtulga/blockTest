@@ -1,13 +1,12 @@
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+
 
 import javax.swing.JOptionPane;
+import javax.swing.event.MouseInputAdapter;
 
-public class dragDrop implements MouseMotionListener, MouseListener {
+public class dragDrop extends MouseInputAdapter {
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
@@ -15,7 +14,6 @@ public class dragDrop implements MouseMotionListener, MouseListener {
 		DrawableBlock block = (DrawableBlock) e.getSource();
 		Point p = e.getLocationOnScreen();
 		block.dragBlock(p);
-
 	}
 	@Override
 	public void mouseMoved(MouseEvent e) {			

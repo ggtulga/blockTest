@@ -7,7 +7,7 @@ public  class MyDispacher implements KeyEventDispatcher {
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent e) {
 		if (DrawableBlock.currentBlock != null && e.getID() == KeyEvent.KEY_FIRST) {
-			System.out.println("++++++");
+			//System.out.println("++++++");
 			String tempText = DrawableBlock.currentBlock.getText();
 			switch ((int) e.getKeyChar()) {
 			case KeyEvent.VK_ENTER:
