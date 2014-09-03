@@ -8,11 +8,14 @@ public class ErrorCheck {
 	String err;
 	boolean foundEnd;
 	HashSet<String> vars;
+	HashSet<DrawableBlock> visited;
 
 	private boolean checkVarname(String varname, boolean isDeclared) {
 		boolean ret = true;
+		
+		varname = varname.trim(); 
 
-		if (varname.trim() == "")
+		if (varname == "")
 			return true;
 
 		if (isDeclared == true) {
@@ -92,6 +95,12 @@ public class ErrorCheck {
 		String cont = new String(v.getText().trim());
 		String varname;
 		int i;
+		
+		if (visited.contains(v)) {
+			return ret;
+		}
+		
+		visited.add(v);
 
 		if (cont == "") {
 			err += "Блок хоосон байж болохгүй!\n";
@@ -251,15 +260,20 @@ public class ErrorCheck {
 			search(v.getNext());
 		return ret;
 	}
+	
+	private void freeMemory() {
+		vars.clear();
+		visited.clear();
+	}
 
 	private void init() {
 		foundEnd = false;
 		err = "";
-		vars.clear();
 	}
 
 	public ErrorCheck() {
 		vars = new HashSet<String>();
+		visited = new HashSet<DrawableBlock>();
 	}
 
 	public boolean checkForErrors(DrawableBlock start) {
@@ -269,6 +283,8 @@ public class ErrorCheck {
 			err += "Заавал нэг төгсгөл байх ёстой!\n"; 
 			ret = true;
 		}
+		// Need to free memory here.
+		freeMemory();
 		return ret;
 	}
 

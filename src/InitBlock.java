@@ -11,12 +11,14 @@ public class InitBlock extends DrawableBlock {
 		super();
 		TYPE = BLOCKTYPE.INIT;
 		setText("");
+		this.setSize(10, 10);
 	}
 
 	public InitBlock(int i){
 		super(i);
 		TYPE = BLOCKTYPE.INIT;
 		setText("Зарлах");
+		this.setSize(10, 10);
 	}
 
 	@Override

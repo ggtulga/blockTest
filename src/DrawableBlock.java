@@ -269,7 +269,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 
 	public boolean dragBlock(Point p){		
 		Point temp = new Point(p);
-		if(getTempLocation() == null) setTempLocation(temp);
+		if(getTempLocation() == null)	setTempLocation(temp);
 		else {
 			p.x = p.x - getTempLocation().x;
 			p.y = p.y - getTempLocation().y;
