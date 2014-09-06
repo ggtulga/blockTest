@@ -8,6 +8,8 @@ import java.io.DataOutputStream;
 
 import org.python.core.PyList;
 import org.python.core.PyDictionary;
+import org.python.core.PyObject;
+import org.python.core.PyTuple;
 
 /**
  * class to generate python script from the connected components
@@ -72,11 +74,16 @@ public class CodeGenerator {
 		 * tabs before code which is very important for python
 		 */
 		public int tabs;
+		public DrawableBlock v;
 
-		public LineCode() { code = ""; tabs = 0; }
-		public LineCode(LineCode l) { this.code = l.code; this.tabs = l.tabs; }
+		public LineCode() { code = ""; tabs = 0; v = null; }
+		public LineCode(LineCode l) {
+			this.v = l.v;
+			this.code = l.code;
+			this.tabs = l.tabs;
+		}
 	}
-
+	
 	/**
 	 * used for dfs
 	 */
@@ -97,6 +104,10 @@ public class CodeGenerator {
 	 */
 	String err;
 
+	// Each element of which describes a trace;
+	ArrayList<BlockTrace> traces;
+
+    
 	private void findLoopBreak(Node p, Node pre) {
 
 		while (p != null) {
@@ -183,6 +194,7 @@ public class CodeGenerator {
 		Node node = g.get(v);
 		LineCode line = new LineCode();
 		line.tabs = tabs;
+		line.v = v;
 		int newTabs = tabs, loop = node.loop;
 
 		if (node.visited)
@@ -409,6 +421,7 @@ public class CodeGenerator {
 		script.clear();
 		output = "";
 		err = "";
+		traces.clear();
 	}
 
 	private void runPythonScript(String s) {
@@ -417,18 +430,43 @@ public class CodeGenerator {
 				"LoggerType", "logger.py");
 		PyList trace = logger.run_script(s); 
 		System.out.println(trace);
+		int lineNumber;
 		for (Iterator<PyList> i = trace.iterator(); i.hasNext(); ) {
-			System.out.println(((PyDictionary) i.next().get(1)).get("__user_stdout__"));
+			PyList list = (PyList) i.next();
+			lineNumber = Integer.parseInt(list.get(0).toString());
+			BlockTrace t = new BlockTrace();
+
+			if (lineNumber > script.size()) {
+			    System.out.println("This should not happen. Out of index\n");
+			    t.setBlock(null);
+			} else
+			    t.setBlock(script.get(lineNumber).v);
+			
+			PyDictionary dict = (PyDictionary) list.get(1);
+			PyTuple var;
+
+			for (PyObject item : dict.iteritems().asIterable()) {
+			    var = (PyTuple) item;
+			    t.addVariable(var.get(0).toString(), var.get(1).toString());
+			    // System.out.println(item);
+			}
+
+			traces.add(t);
+			// System.out.println((list.get(1)).get("__user_stdout__"));
 		}
 
-		output = (String) ((PyDictionary) ((PyList) trace.get(trace.size() - 1)).get(1)).get("__user_stdout__");
+		// output = (String) ((PyDictionary) ((PyList) trace.get(trace.size() - 1)).get(1)).get("__user_stdout__");
+
+		for (int i = 0; i < traces.size(); i++)
+		    for (Object k : traces.get(i).getVariables().keySet())
+			System.out.println(k.toString() + ": " + traces.get(i).getVariables().get(k).toString());
 	}
 
 
 
 	public CodeGenerator() {
 		script = new ArrayList<LineCode>();
-
+		traces = new ArrayList<BlockTrace>();
 	}
 
 	/**
