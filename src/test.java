@@ -102,7 +102,9 @@ public class test extends JFrame {
 				if (checker.checkForErrors(mainTestPanel.getStartBlock()) == false) {
 					CodeGenerator g = new CodeGenerator();
 					if (g.generateCode(mainTestPanel.getStartBlock())) {
-						outArea.setText(g.getOutput());
+					    
+						// outArea.setText(g.getOutput());
+					    
 					} else {
 						outArea.setText(g.getError());
 					}

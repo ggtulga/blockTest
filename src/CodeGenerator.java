@@ -230,9 +230,8 @@ public class CodeGenerator {
 		if (v.TYPE == BLOCKTYPE.INIT) {
 			// Let's do a nice thing by separating declarations by commas
 			int s = 0, f = 0, x, y, size;
-			boolean foundArray = false;			
 			String c = v.getText(), tmp = "";
-			HashMap<String, Integer> arrays = new HashMap<String, Integer>();
+			HashMap<String, String> vars = new HashMap<String, String>();
 			while (true) {
 				f = c.indexOf(',', f);
 				if (f == -1)
@@ -243,20 +242,11 @@ public class CodeGenerator {
 				x = tmp.indexOf('[');
 				if (x != -1) {
 					// it's an array
-					foundArray = true;
 					y = tmp.indexOf(']', x + 1);
-					size = Integer.parseInt(tmp.substring(x + 1, y));
-					arrays.put(tmp.substring(0, x), size);
+					vars.put(tmp.substring(0, x), "[None]*" + tmp.substring(x + 1, y));
+				} else {
+					vars.put(tmp, "None");
 				}
-//				// if it's not the first declaration
-//				if (s != 0)
-//					tmp = "," + tmp;
-//
-//				if (tmp.indexOf('=') == -1) 
-//					line.code += tmp + "=None";
-//				else
-//					line.code += tmp;
-
 
 				if (f == c.length())
 					break; // this is the end of this list of declarations;
@@ -264,25 +254,22 @@ public class CodeGenerator {
 				f++;
 				s = f; // new start
 			}
-			// if there's no array, write empty code
-			if (foundArray == false)
-				line.code += "None";
-			else {
-				String rvalue = "=";
-				Iterator i = arrays.entrySet().iterator();
-				Map.Entry<String, Integer> pair;
-				while (true) {
-					pair = (Map.Entry<String, Integer>) i.next();
-					line.code += pair.getKey();
-					rvalue += "[None]*" + pair.getValue();
-					if (i.hasNext()) {
-						line.code += ",";
-						rvalue += ",";
-					} else
-						break;
-				}
-				line.code += rvalue;
+
+			String rvalue = "=";
+			Iterator i = vars.entrySet().iterator();
+			Map.Entry<String, String> pair;
+			while (true) {
+				pair = (Map.Entry<String, String>) i.next();
+				line.code += pair.getKey();
+				rvalue += pair.getValue();
+				if (i.hasNext()) {
+					line.code += ",";
+					rvalue += ",";
+				} else
+					break;
 			}
+			line.code += rvalue;
+
 		} else 	if (v.TYPE == BLOCKTYPE.OUTPUT) {
 			line.code = "print(" + v.getText() + ")";
 		} else if (v.TYPE == BLOCKTYPE.IF) {
@@ -434,32 +421,64 @@ public class CodeGenerator {
 		for (Iterator<PyList> i = trace.iterator(); i.hasNext(); ) {
 			PyList list = (PyList) i.next();
 			lineNumber = Integer.parseInt(list.get(0).toString());
-			BlockTrace t = new BlockTrace();
 
-			if (lineNumber > script.size()) {
+			// Need to substract 2:
+			// - array starts from 0
+			// - two for the imports
+			if (lineNumber - 3 >= script.size()) {
 			    System.out.println("This should not happen. Out of index\n");
-			    t.setBlock(null);
-			} else
-			    t.setBlock(script.get(lineNumber).v);
+			    continue;
+			} else if (lineNumber - 3 < 0)
+			    continue;
+
+			BlockTrace t = new BlockTrace();
+			t.setBlock(script.get(lineNumber - 3).v);
+
 			
 			PyDictionary dict = (PyDictionary) list.get(1);
 			PyTuple var;
 
 			for (PyObject item : dict.iteritems().asIterable()) {
 			    var = (PyTuple) item;
-			    t.addVariable(var.get(0).toString(), var.get(1).toString());
-			    // System.out.println(item);
+			    if (var.get(1) == null)
+				    t.addVariable(var.get(0).toString(), "Хоосон");
+			    else
+				    t.addVariable(var.get(0).toString(), var.get(1).toString());
 			}
 
 			traces.add(t);
-			// System.out.println((list.get(1)).get("__user_stdout__"));
 		}
 
-		// output = (String) ((PyDictionary) ((PyList) trace.get(trace.size() - 1)).get(1)).get("__user_stdout__");
+		for (int i = 0; i < traces.size(); i++) {
+		    // System.out.println(i + ":");
+		    // switch (traces.get(i).getBlock().TYPE) {
+		    // case BEGIN:
+		    // 	System.out.println("begin");
+		    // 	break;
+		    // case IF:
+		    // 	System.out.println("if");
+		    // 	break;
+		    // case INIT:
+		    // 	System.out.println("init");
+		    // 	break;
+		    // case VALUE:
+		    // 	System.out.println("value");
+		    // 	break;
+		    // case INPUT:
+		    // 	System.out.println("input");
+		    // 	break;
+		    // case OUTPUT:
+		    // 	System.out.println("OUTPUT");
+		    // 	break;
+		    // case END:
+		    // 	System.out.println("end");
+		    // 	break;
 
-		for (int i = 0; i < traces.size(); i++)
+		    // }
+		
 		    for (Object k : traces.get(i).getVariables().keySet())
 			System.out.println(k.toString() + ": " + traces.get(i).getVariables().get(k).toString());
+		}
 	}
 
 
@@ -497,8 +516,8 @@ public class CodeGenerator {
 		return true;
 	}
 
-	public String getOutput() {
-		return output;
+	public ArrayList<BlockTrace> getOutput() {
+		return traces;
 	}
 
 	public String getError() {

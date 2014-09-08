@@ -13,5 +13,5 @@ public class ErrorMessage {
     public DrawableBlock getBlock() { return v; }
 
     public void setMsg(String m) { msg = m; }
-    public String getMsg() { return m; }
+    public String getMsg() { return msg; }
 };
