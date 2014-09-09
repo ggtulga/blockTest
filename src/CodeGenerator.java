@@ -441,7 +441,7 @@ public class CodeGenerator {
 			for (PyObject item : dict.iteritems().asIterable()) {
 			    var = (PyTuple) item;
 			    if (var.get(1) == null)
-				    t.addVariable(var.get(0).toString(), "Хоосон");
+				    t.addVariable(var.get(0).toString(), "None");
 			    else
 				    t.addVariable(var.get(0).toString(), var.get(1).toString());
 			}

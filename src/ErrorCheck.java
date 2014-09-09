@@ -2,6 +2,7 @@
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 
 public class ErrorCheck {
 
@@ -9,6 +10,8 @@ public class ErrorCheck {
 	boolean foundEnd;
 	HashSet<String> vars;
 	HashSet<DrawableBlock> visited;
+	ArrayList<ErrorMessage> errs;
+	DrawableBlock current;
 
 	private boolean checkVarname(String varname, boolean isDeclared) {
 		boolean ret = true;
@@ -28,13 +31,13 @@ public class ErrorCheck {
 
 		// check if there's a whitespace
 		if (varname.matches("[^\\s]*") == false) {
-			err += "Хувьсагчдын нэрүүд таслалаар тусгаарлагдах ба нэр нь хоосон зай агуулахгүй!\n";
+			errs.add(new ErrorMessage(0, current));
 			ret = false;
 		}
 
 		// validate variable name.
 		if (varname.matches("^[A-Za-z][A-Za-z0-9\\[\\]]*") == false) {
-			err += "Хувьсагчийн нэр зөвхөн Англи цагаан толгойн үсгүүд болон тоог агуулсан байна. Гэхдээ тоогоор эхлэж болохгүй!\n";
+			errs.add(new ErrorMessage(1, current));
 			ret = false;
 		}
 
@@ -46,12 +49,12 @@ public class ErrorCheck {
 
 			if (vars.contains(varname) == false) {
 				if (isDeclared == true) {
-					err += varname + " хувьсагч зарлагдаагүй байна!\n";
+					errs.add(new ErrorMessage(varname, 2, current));
 					ret = false;
 				}
 			} else if (isDeclared == false) {
-					err += varname + " хувьсагч аль хэдийн зарлагдсан байна!\n";
-					ret = false;
+				errs.add(new ErrorMessage(varname, 3, current));
+				ret = false;
 			}
 		}
 
@@ -65,7 +68,7 @@ public class ErrorCheck {
 				while (true) {
 					i = cont.indexOf('\'', i + 1);
 					if (i == -1) {
-						err += "Тэмдэгтэн цуваа ' тэмдэгтээр төгсөх ёстой!\n";
+						errs.add(new ErrorMessage(4, current));
 						return false;
 					} else if (cont.charAt(i - 1) != '\\') // if it's escaped search again.
 						break;
@@ -74,7 +77,7 @@ public class ErrorCheck {
 				while (true) {
 					i = cont.indexOf('"', i + 1);
 					if (i == -1) {
-						err += "Тэмдэгтэн цуваа \" тэмдэгтээр төгсөх ёстой!\n";
+						errs.add(new ErrorMessage(5, current));
 						return false;
 					} else if (cont.charAt(i - 1) != '\\') // if it's escaped search again.
 						break;
@@ -89,6 +92,8 @@ public class ErrorCheck {
 	{
 		if (v == null)
 			return false;
+
+		current = v;
 		
 		boolean ret = false;
 		boolean isValid;
@@ -103,7 +108,7 @@ public class ErrorCheck {
 		visited.add(v);
 
 		if (cont == "") {
-			err += "Блок хоосон байж болохгүй!\n";
+			errs.add(new ErrorMessage(6, current));
 			ret = true;
 		}
 
@@ -128,7 +133,7 @@ public class ErrorCheck {
 				if (varname.matches("\\p{Alnum}+\\[\\p{Alnum}*\\]") == true) {
 					// if it is an array check for the size.				
 					if (varname.matches("\\p{Alnum}+\\[\\d+\\]") == false) {
-						err += "Хүснэгтийн хэмжээ тогтмол тоо байна.!\n";
+						errs.add(new ErrorMessage(7, current));
 						isValid = false;
 					}
 					varname = varname.substring(0, varname.indexOf('['));
@@ -150,7 +155,7 @@ public class ErrorCheck {
 		case INPUT:
 
 			if (cont.matches("[^\\s,]*") == false) {
-				err += "Хэрэглэгчээс нэг дор зөвхөн нэг л хувьсагчид утга авна!\n";
+				errs.add(new ErrorMessage(8, current));
 				ret = true;
 			} else if (checkVarname(cont, true) == false)
 				ret = true;
@@ -166,7 +171,7 @@ public class ErrorCheck {
 						while (true) {
 							f = cont.indexOf('\'', s + 1);
 							if (f == -1) {
-								err += "Тэмдэгтэн цувааны алдаа!\n";
+								errs.add(new ErrorMessage(9, current));
 								ret = true;
 								break;
 							}
@@ -182,7 +187,7 @@ public class ErrorCheck {
 						while (true) {
 							f = cont.indexOf('"', s + 1);
 							if (f == -1) {
-								err += "Тэмдэгтэн цувааны алдаа!\n";
+								errs.add(new ErrorMessage(9, current));
 								ret = true;
 								break;
 							}
@@ -207,7 +212,7 @@ public class ErrorCheck {
 				for (i = 0; i < names.length; i++) {
 					Matcher m = p.matcher(names[i]);
 					if (m.find()) {
-						err += "Зөвхөн <=, >=, ==, <, >, != харьцуулах операторуудыг хэрэглэнэ үү.";
+						errs.add(new ErrorMessage(10, current));
 						ret = true;
 					} else if (checkVarname(names[i], true) == false) 
 						ret = true;
@@ -250,7 +255,7 @@ public class ErrorCheck {
 		
 		// it's safe to check here. Because if blocks don't reach here.
 		if (v.TYPE != BLOCKTYPE.END && v.getNext() == null) {
-			err += "Бүх болокууд хоорондоо холбогдсон байх ёстой ба хамгийн сүүлд төгсгөлийн блоктой холбогдоно!\n";
+			errs.add(new ErrorMessage(11, current));
 			return true;
 		}
 
@@ -269,15 +274,18 @@ public class ErrorCheck {
 	private void init() {
 		foundEnd = false;
 		err = "";
+		errs.clear();
 	}
 
 	public ErrorCheck() {
 		vars = new HashSet<String>();
 		visited = new HashSet<DrawableBlock>();
+		errs = new ArrayList<ErrorMessage>();
 	}
 
 	public boolean checkForErrors(DrawableBlock start) {
 		init();
+		current = start;
 		boolean ret = search(start);
 		if (foundEnd == false) {
 			err += "Заавал нэг төгсгөл байх ёстой!\n"; 
@@ -288,7 +296,7 @@ public class ErrorCheck {
 		return ret;
 	}
 
-	public String getErrors() {
-		return err;
+	public ArrayList<ErrorMessage> getErrors() {
+		return errs;
 	}
 }
