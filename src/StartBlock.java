@@ -1,3 +1,4 @@
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.KeyEventDispatcher;
@@ -5,16 +6,16 @@ import java.awt.Point;
 
 
 public class StartBlock extends DrawableBlock{
-
+	private DrawableBlock next;
 	public StartBlock(){
 		super();
 		setText("");
-		TYPE = BLOCKTYPE.BEGIN;
+		TYPE=BLOCKTYPE.BEGIN;
 	}
 	public StartBlock(int i){
 		super(i);
 		setText("Start");
-		TYPE = BLOCKTYPE.BEGIN;
+		TYPE=BLOCKTYPE.BEGIN;
 	}
 	@Override
 	public void draw(Graphics g) {
@@ -32,5 +33,10 @@ public class StartBlock extends DrawableBlock{
 		g.drawLine(getWidth() / 2, getHeight() - 10, getWidth() / 2,
 				getHeight());		
 	}
+	@Override
+	public Point getInputPoint() {
+		return null;
+	}
+	
 
 }

@@ -1,172 +1,177 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 
 public class test extends JFrame {
 
+	private static final long serialVersionUID = 1L;
+	private File currentFile=null;
+	private final static String TITEL="Flow chart runner";
+	private static char FileEdited=' ';
 	private JFileChooser fileChooser;
-	// Drawing area
-	testPanel mainTestPanel;
-
-	// save, open, check buttons
+	testPanel mainPanel;
+	JList<String> inputList;
+	Map<String,String> inputs;
+	JPanel inputPanel;
+	DefaultListModel<String> inputModel;
+	JTextArea taResult;
+	String currentVariable="";
 	JPanel jpMenuBar;
-	// Show outputs for the code generation
-	//JScrollPane output;
-	JTextArea errArea;
-	JTextArea outArea;
-
+	ToolBar t;
+	private JPanel temp=new JPanel(new GridLayout());
+	@SuppressWarnings("deprecation")
 	public test() {
+		setTitle(TITEL);
 		setLayout(new BorderLayout());
-
-		//JPanel mainPanel = new JPanel(new GridLayout());
+		JPanel holderPanel = new JPanel(new BorderLayout());
+		holderPanel.add(temp, BorderLayout.NORTH);
+		setLayout(new BorderLayout());
+	      //Size(1000,1000);
+		TitledBorder title = BorderFactory.createTitledBorder(
+				BorderFactory.createLoweredBevelBorder(), " ");
+		title.setTitlePosition(TitledBorder.CENTER);
+		setJMenuBar(createMenuBar());
 		
-		TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createLoweredBevelBorder(),
-				"шинэ талбар");
-		//title.setTitlePosition(TitledBorder.CENTER);
-		//mainPanel.setBorder(title);
 		
-		mainTestPanel = new testPanel();
-		mainTestPanel.setBorder(title);
-		//mainPanel.add(mainTestPanel);
-		JScrollPane mainScroll = new JScrollPane(mainTestPanel,
-				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
-		//init menu
-		fileChooser = new JFileChooser();
-		FileNameExtensionFilter blockFilter = new FileNameExtensionFilter("block files (*.block)", "block");
-		fileChooser.setFileFilter(blockFilter);
+		
+		temp.setBorder(title);
+		
+		
+		mainPanel = new testPanel();
+		mainPanel.newPanel();
+		mainPanel.setPreferredSize(new Dimension(1000, 1000));
+		temp.add(mainPanel);		
+		t = new ToolBar();
+		setLayout(new BorderLayout());			
+		add(t, BorderLayout.LINE_START);
+		
+		getContentPane().add(new JScrollPane(holderPanel), BorderLayout.CENTER);
+	
+		//add(temp, BorderLayout.CENTER);	
+		
+		
+		fileChooser=new JFileChooser();
+		 FileNameExtensionFilter blockfilter = new FileNameExtensionFilter("block files (*.block)", "block");
+		 fileChooser.setFileFilter(blockfilter);
+		jpMenuBar=new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JButton btnNew=new JButton("New");
+		btnNew.setFocusable(false);
+		btnNew.addActionListener(new ActionListener(){
 
-		// Buttons are added to this menubar
-		jpMenuBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-		JButton btnSave = new JButton("Хадгалах");
-		btnSave.setFocusable(false);
-		btnSave.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {	
-				int returnVal = fileChooser.showSaveDialog(mainTestPanel);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fileChooser.getSelectedFile();
-					mainTestPanel.savePanel(file);
-					repaint();
-				} 
+
+				newp();
+				
+			}			
+		});
+		jpMenuBar.add(btnNew);
+		JButton btnSave=new JButton("Save");
+		btnSave.setFocusable(false);
+		btnSave.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {	
+
+				save();
 			}			
 		});
 		jpMenuBar.add(btnSave);
-
-		JButton btnOpen = new JButton("Нээх");
+		JButton btnOpen=new JButton("Open");
 		btnOpen.setFocusable(false);
-		btnOpen.addActionListener(new ActionListener() {
+		btnOpen.addActionListener(new ActionListener(){
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int returnVal = fileChooser.showOpenDialog(mainTestPanel);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fileChooser.getSelectedFile();
-					mainTestPanel.openFile(file);
-					repaint();
-				}
+				open();
 			}			
 		});
 		jpMenuBar.add(btnOpen);
+		
+		//////////////////debug test////////////////////////
+		JButton btnrun=new JButton("run");
+		btnrun.setFocusable(false);
+		btnrun.addActionListener(new ActionListener(){
 
-		JButton btnCheck = new JButton("Шалгах");
-		btnCheck.setFocusable(false);
-		btnCheck.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
-				// Construct python code
-				//DrawableBlock.setCurrentBlock(null);
-				ErrorCheck checker = new ErrorCheck();
-				if (checker.checkForErrors(mainTestPanel.getStartBlock()) == false) {
-					CodeGenerator g = new CodeGenerator();
-					if (g.generateCode(mainTestPanel.getStartBlock())) {
-					    
-						// outArea.setText(g.getOutput());
-					    
-					} else {
-						outArea.setText(g.getError());
-					}
-				} else
-					errArea.setText(checker.getErrors());
+				temp.add(new JLabel("dfff"));
+				System.out.println("dfns,fnsd,");
+				revalidate();
+				repaint();
 				
-			}				
+				ErrorCheck checker = new ErrorCheck();
+				if (checker.checkForErrors(mainPanel.getStartBlock()) == false) {
+					CodeGenerator g = new CodeGenerator();
+					if (g.generateCode(mainPanel.getStartBlock())) {
+						
+						// outArea.setText(g.getOutput());
+						
+					} else {
+						// outArea.setText(g.getError());
+					}
+				} else {
+					// errArea.setText(checker.getErrors());
+				}
+			}			
 		});
-		jpMenuBar.add(btnCheck);
-
-		this.add(jpMenuBar, BorderLayout.NORTH);
+		jpMenuBar.add(btnrun);
 		
-		JTabbedPane tabbedPane = new JTabbedPane();
+		inputs=new HashMap<String, String>();
+		inputPanel=new JPanel(new FlowLayout());
 		
-		// textfield to show outputs
-		outArea = new JTextArea();
-		outArea.setFocusable(false);
-		outArea.setEditable(false);
-		JScrollPane outputScrollPane = new JScrollPane(outArea, 
-				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,  
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
-		errArea = new JTextArea();
-		errArea.setFocusable(false);
-		errArea.setEditable(false);
-		errArea.setForeground(Color.red);
+		this.add(jpMenuBar,BorderLayout.NORTH);
 		
-		JScrollPane errorScrollPane = new JScrollPane(errArea, 
-				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		
-		tabbedPane.addTab("Алдаа", errorScrollPane);
-		tabbedPane.addTab("Гаралт", outputScrollPane);
-
-		JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		JSplitPane horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		verticalSplit.add(horizontalSplit);
-
-		horizontalSplit.add(new ToolBar());
-		horizontalSplit.add(mainScroll);
-		verticalSplit.setDividerLocation(500);
-
-		this.add(verticalSplit, BorderLayout.CENTER);
-		
-		verticalSplit.add(tabbedPane);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		this.setSize(800, 600);
-		this.setVisible(true);;
+		this.show();
 		this.repaint();		
 	}
-
 	public static void main(String[] args) {
 		new test();
 	}
-
 	public class ToolBar extends JPanel implements MouseListener {
 
+		private static final long serialVersionUID = 1L;
+		List<JComponent> tools;
+		
 		public ToolBar() {
 			super();
 			setLayout(new GridLayout());
-
-			List<JComponent> tools = new ArrayList<JComponent>();
+			tools = new ArrayList<JComponent>();
 			JComponent cc = new InitBlock(3);
 			cc.setLocation(18, 0);
 			tools.add(cc);
@@ -195,20 +200,23 @@ public class test extends JFrame {
 
 				temp.add(t);
 			}
-
+			System.out.println(temp.getHeight());
 			temp.setSize(100, 1000);
 			TitledBorder title = BorderFactory.createTitledBorder(
 					BorderFactory.createLoweredBevelBorder(), "Блокууд");
 			title.setTitlePosition(TitledBorder.CENTER);
 			temp.setBorder(title);
-			temp.add(new JLabel("                                      "));
+			temp.add(new JLabel("                                     "));
 			temp.setSize(100, 100);
 			this.add(temp);
+		}
+		public List<JComponent> getTools() {
+			return tools;
 		}
 		@Override
 		public void mouseClicked(MouseEvent e) {
 
-
+			
 		}
 
 		@Override
@@ -216,12 +224,13 @@ public class test extends JFrame {
 			DrawableBlock block = (DrawableBlock) e.getSource();
 			if (block.getColor().equals(Color.red)) {
 				block.setColor(Color.blue);
-				mainTestPanel.setNewBlock(null);
+				mainPanel.setNewBlock(null);
 			} else {
 				block.setColor(Color.red);
-				if(mainTestPanel.getNewBlock()!=null)
-					mainTestPanel.getNewBlock().setColor(Color.black);
-				mainTestPanel.setNewBlock(block);
+				if(mainPanel.getNewBlock()!=null)
+					mainPanel.getNewBlock().setColor(Color.black);
+					mainPanel.setNewBlock(block);
+					setEdited();
 			}
 		}
 
@@ -242,6 +251,150 @@ public class test extends JFrame {
 				block.setColor(Color.black);
 		}
 	}
+	public void setEditable(boolean edit){
+		mainPanel.setEnabled(edit);
+		for (Component c : t.getTools()) {
+			DrawableBlock b=(DrawableBlock)c;
+			b.setEnabled(edit);
+			if(edit)
+			{
+				b.addMouseListener(t);
+			}
+			else
+				b.removeMouseListener(t);
+		}
+		for (Component c : jpMenuBar.getComponents()) {
+			
+			c.setEnabled(edit);
+		
+		}
+	}
+	  public JMenuBar createMenuBar() {
+	      JMenuBar top_menu_bar = new JMenuBar();
+	      JMenu main_menu = new JMenu("Menu");
+	      main_menu.setMnemonic(KeyEvent.VK_M);
+	      top_menu_bar.add(main_menu);
+	      JMenuItem menu_item;
 
-    
+	      menu_item = new JMenuItem("New file");
+	      menu_item.setMnemonic(KeyEvent.VK_N);
+	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+	            ActionEvent.CTRL_MASK));
+	      menu_item.setActionCommand("new");
+	      menu_item.addActionListener(new ActionListener() {
+
+	         @Override
+	         public void actionPerformed(ActionEvent arg0) {
+	            if(arg0.getActionCommand().equals("save")){
+	            	newp();
+	            }
+	         }
+	      });
+	      main_menu.add(menu_item);
+	      menu_item = new JMenuItem("Open file");
+	      menu_item.setMnemonic(KeyEvent.VK_O);
+	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+	            ActionEvent.CTRL_MASK));
+	      menu_item.setActionCommand("open");
+	      menu_item.addActionListener(new ActionListener() {
+
+	         @Override
+	         public void actionPerformed(ActionEvent arg0) {
+	            if(arg0.getActionCommand().equals("open")){
+	            	open();
+	            }
+	         }
+	      });
+	      main_menu.add(menu_item);
+	      menu_item = new JMenuItem("Save");
+	      menu_item.setMnemonic(KeyEvent.VK_S);
+	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+	            ActionEvent.CTRL_MASK));
+	      menu_item.setActionCommand("save");
+	      menu_item.addActionListener(new ActionListener() {
+
+	         @Override
+	         public void actionPerformed(ActionEvent arg0) {
+	            if(arg0.getActionCommand().equals("save")){
+	            	save();
+	            }
+	         }
+	      });
+	      main_menu.add(menu_item);
+	      menu_item = new JMenuItem("Save as");
+	      menu_item.setActionCommand("save");
+	      menu_item.addActionListener(new ActionListener() {
+
+	         @Override
+	         public void actionPerformed(ActionEvent arg0) {
+	            if(arg0.getActionCommand().equals("save")){
+	            	saveAs();
+	            }
+	         }
+	      });
+	      main_menu.add(menu_item);
+
+	      return top_menu_bar;
+	   }
+	  private void saveAs(){
+		  int returnVal = fileChooser.showSaveDialog(mainPanel);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+            currentFile = fileChooser.getSelectedFile();
+				mainPanel.savePanel(currentFile);
+				repaint();
+				setTitle(TITEL+" - "+currentFile.getAbsolutePath());
+				FileEdited=' ';
+				
+        } 
+	  }
+	  private void save(){
+		  if(currentFile==null)
+			  saveAs();
+		  else
+			  mainPanel.savePanel(currentFile);
+		  FileEdited=' ';
+	  }
+	  private void open(){
+		 if(checkFileSaved()==1||FileEdited==' ')
+		 {
+		  int returnVal = fileChooser.showOpenDialog(mainPanel);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+              currentFile = fileChooser.getSelectedFile();
+              mainPanel.openFile(currentFile);
+			  repaint();
+			  FileEdited=' ';
+			  setTitle(TITEL+" - "+currentFile.getAbsolutePath());
+          }
+		 }
+	  }
+	  private void newp(){
+		  if(checkFileSaved()==1||FileEdited==' ')
+			 {
+			  mainPanel.newPanel();
+			  currentFile=null;
+			  setTitle(TITEL);
+			 }
+	  }
+	 
+	public static void setEdited() {
+		// TODO Auto-generated method stub
+	//	super.setEnabled(arg0);
+		  FileEdited='*';
+		  
+	}
+	
+	private int checkFileSaved(){
+		 if(FileEdited!=' '){
+			  String msg="Баримтыг хадгалах уу?";
+			  if(currentFile!=null)
+				  msg=currentFile.getName()+ "-д өөрчлөлт орсон байна. өөрчлөлтийг хадгалах уу?";
+			  int result=JOptionPane.showConfirmDialog(this, msg,"Анхааруулга", JOptionPane.YES_NO_OPTION);
+			  if(result==JOptionPane.YES_OPTION){
+				  save();
+				  return 1;
+			  }else if(result==JOptionPane.NO_OPTION)
+				  return 1;
+		  }
+		 return 0;
+	}
 }

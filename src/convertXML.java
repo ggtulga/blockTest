@@ -8,7 +8,8 @@ public class convertXML {
 	};
 	public static void writeToXML(List<DrawableBlock> blocks,File xmlFile){
 		for(DrawableBlock block:blocks){
-
+			if(!block.isHasBefore());
+			//System.out.println(block.toXMLTags());
 		}
 	};
 	
