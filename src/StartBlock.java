@@ -8,14 +8,12 @@ import java.awt.Point;
 public class StartBlock extends DrawableBlock{
 	private DrawableBlock next;
 	public StartBlock(){
-		super();
+		super(BLOCKTYPE.BEGIN);
 		setText("");
-		TYPE=BLOCKTYPE.BEGIN;
 	}
 	public StartBlock(int i){
-		super(i);
+		super(BLOCKTYPE.BEGIN,i);
 		setText("Start");
-		TYPE=BLOCKTYPE.BEGIN;
 	}
 	@Override
 	public void draw(Graphics g) {

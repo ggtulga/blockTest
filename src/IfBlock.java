@@ -9,15 +9,14 @@ public class IfBlock   extends DrawableBlock{
 	private DrawableBlock nextTrue,nextFalse;
 	
 	public IfBlock  (){
-		super();
+		super(BLOCKTYPE.IF);
 		setText("");
-		TYPE=BLOCKTYPE.IF;	
 	}
 	public IfBlock(int i){
-		super(i);
+		super(BLOCKTYPE.IF,i);
 		setText("Шалгах");
-		TYPE=BLOCKTYPE.IF;
 	}
+	
 	@Override
 	public void draw(Graphics g) {
 		if(getText().length()<5){

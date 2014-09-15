@@ -20,6 +20,9 @@ import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.KeyStroke;
+
+import org.python.antlr.PythonTreeTester.Block;
 
 public abstract class DrawableBlock extends JComponent implements ActionListener {
 	/**
@@ -36,12 +39,19 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	private int state = 0;
 	public BLOCKTYPE TYPE;
 	private Color color,beforeColor;
+	public List<DrawableBlock> getBeforeBlocks() {
+		return beforeBlocks;
+	}
+	public void setBeforeBlocks(List<DrawableBlock> beforeBlocks) {
+		this.beforeBlocks = beforeBlocks;
+	}
 	private DrawableBlock next = null;
 	private List<DrawableBlock> beforeBlocks = new ArrayList<DrawableBlock>();
 	private dragDrop action;
-	public DrawableBlock() {
+	public DrawableBlock(BLOCKTYPE type) {
 		super();
 		Text = "";
+		TYPE=type;
 		textFont = new Font(Font.MONOSPACED, Font.ITALIC | Font.BOLD, 14);
 		setLocation(0, 0);
 		setSize(200, 200);
@@ -57,35 +67,27 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	@Override
 	public void setEnabled(boolean enabled) {
 		// TODO Auto-generated method stub
+		setColor(Color.black);
 		super.setEnabled(enabled);
 		if(enabled){
 			initListners();
-			this.add(popupMenu);
+			//this.add(popupMenu);
+			enableEvents(AWTEvent.MOUSE_EVENT_MASK);
 			
 		}else{
 			this.removeMouseMotionListener(action);
 			this.removeMouseListener(action);
-			this.remove(popupMenu);
-			
+			this.remove(this.popupMenu);
+			disableEvents(AWTEvent.MOUSE_EVENT_MASK);
 		}
 	}
-	public DrawableBlock(DrawableBlock block) {
-		super();
-		Text = block.getText();
-		textFont = new Font(Font.MONOSPACED, Font.ITALIC | Font.BOLD, 14);
-		setLocation(block.getLocation());
-		setSize(block.getSize());
-		setColor(Color.black);
-		popupMenu = new JPopupMenu("Menu");
-		action=new dragDrop();
-		initListners();
-		initMenu();
-	}
+	
 	
 	/**
 	 * */
-	public DrawableBlock(int i){
+	public DrawableBlock(BLOCKTYPE type,int i){
 		super();
+		TYPE=type;
 		Text = "";
 		textFont = new Font(Font.MONOSPACED, Font.ITALIC | Font.BOLD, 14);
 		setLocation(0, 0);
@@ -106,16 +108,30 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	}
 	public void initMenu() {
 		// Create some menu items for the popup
-		JMenuItem menuFileNew = new JMenuItem("Засварлах");
-		JMenuItem menuLink = new JMenuItem("Устгах");
-		// Create a popup menu
+		JMenuItem menuEdit = new JMenuItem("Засварлах");
+		JMenuItem menuDelete = new JMenuItem("Устгах");
 		
-		popupMenu.add(menuFileNew);
-		popupMenu.add(menuLink);
+		
+		menuEdit.setMnemonic(KeyEvent.VK_E);
+		menuEdit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,
+	            ActionEvent.CTRL_MASK));
+		menuDelete.setMnemonic(KeyEvent.VK_DELETE);
+		menuDelete.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,
+	            ActionEvent.CTRL_MASK));
+		
+		// Create a popup menu
+		if(!(TYPE.equals(BLOCKTYPE.BEGIN)||TYPE.equals(BLOCKTYPE.END))){
+			popupMenu.add(menuEdit);
+		
+			System.out.println(TYPE);
+		}
+		if(TYPE!=BLOCKTYPE.BEGIN)
+			popupMenu.add(menuDelete);
 		this.add(popupMenu);
 		enableEvents(AWTEvent.MOUSE_EVENT_MASK);
-		menuFileNew.addActionListener(this);
-		menuLink.addActionListener(this);
+		
+		menuEdit.addActionListener(this);
+		menuDelete.addActionListener(this);
 		
 	}
 
@@ -148,6 +164,10 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		}else
 			this.setSize((int)(charWidth/1.5) *getText().length()+20, 50);
 		g.setFont(getFont());
+		if(this.equals(CurrentNote))
+		{
+			setColor(Color.CYAN);
+		}
 		draw(g);
 	}
 
@@ -188,34 +208,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 			firstBLock = null;
 			break;
 		case "Устгах":
-			if(this.TYPE!=BLOCKTYPE.BEGIN){
-				Container c = this.getParent();
-				for (DrawableBlock b : beforeBlocks){
-					if (b.TYPE != BLOCKTYPE.IF)
-						b.setNext(null);
-					else {
-						IfBlock block = (IfBlock) b;
-						if(block.getNextTrue().equals(this)) 
-							block.setNextTrue(null);
-						else
-							block.setNextFalse(null);
-					}
-				}
-				if (this.TYPE == BLOCKTYPE.IF) {
-					IfBlock block = (IfBlock) this;
-					if (block.getNextTrue() != null)
-						block.getNextTrue().removeBefore(this);
-					if (block.getNextFalse() != null)
-						block.getNextFalse().removeBefore(this);
-					block.setNextTrue(null);
-					block.setNextFalse(null);
-				} else if (this.getNext() != null)
-					this.getNext().removeBefore(this);
-				this.setNext(null);
-				c.repaint();
-				c.remove(this);
-				firstBLock = null;
-			}
+			removeThis();break;
 		default:
 			break;
 		}
@@ -345,6 +338,39 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 			}					
 	}
 	
-	
+	public void removeThis(){
+		
+		if(this.TYPE!=BLOCKTYPE.BEGIN){
+			Container c = this.getParent();
+			for (DrawableBlock b : beforeBlocks){
+				if (b.TYPE != BLOCKTYPE.IF)
+					b.setNext(null);
+				else {
+					IfBlock block = (IfBlock) b;
+					if(block.getNextTrue().equals(this)) 
+						block.setNextTrue(null);
+					else
+						block.setNextFalse(null);
+				}
+			}
+			if (this.TYPE == BLOCKTYPE.IF) {
+				IfBlock block = (IfBlock) this;
+				if (block.getNextTrue() != null)
+					block.getNextTrue().removeBefore(this);
+				if (block.getNextFalse() != null)
+					block.getNextFalse().removeBefore(this);
+				block.setNextTrue(null);
+				block.setNextFalse(null);
+			} else if (this.getNext() != null)
+				this.getNext().removeBefore(this);
+			this.setNext(null);
+			try{
+			c.remove(this);
+
+			c.repaint();
+			}catch(Exception e){};
+			firstBLock = null;
+		}
+	}
 	
 }

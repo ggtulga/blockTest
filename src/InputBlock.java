@@ -8,14 +8,12 @@ import java.awt.KeyEventDispatcher;
 public class InputBlock  extends DrawableBlock{
 	private DrawableBlock before,next;
 	public InputBlock (){
-		super();
+		super(BLOCKTYPE.INPUT);
 		setText("");
-		TYPE=BLOCKTYPE.INPUT;
 	}
 	public InputBlock(int i){
-		super(i);
+		super(BLOCKTYPE.INPUT,i);
 		setText("Оруулах");
-		TYPE=BLOCKTYPE.INPUT;
 	}
 	@Override
 	public void draw(Graphics g) {

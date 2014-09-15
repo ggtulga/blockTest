@@ -49,7 +49,8 @@ public class test extends JFrame {
 	JTextArea taResult;
 	String currentVariable="";
 	JPanel jpMenuBar;
-	ToolBar t;
+	ToolBar toolBar;
+	JPanel result;
 	private JPanel temp=new JPanel(new GridLayout());
 	@SuppressWarnings("deprecation")
 	public test() {
@@ -64,22 +65,22 @@ public class test extends JFrame {
 		title.setTitlePosition(TitledBorder.CENTER);
 		setJMenuBar(createMenuBar());
 		
-		
-		
-		
+		result=new JPanel(new GridLayout(1,1));
+	
 		temp.setBorder(title);
-		
-		
-		mainPanel = new testPanel();
+
+		mainPanel = new testPanel(this);
 		mainPanel.newPanel();
 		mainPanel.setPreferredSize(new Dimension(1000, 1000));
 		temp.add(mainPanel);		
-		t = new ToolBar();
+		toolBar = new ToolBar();
 		setLayout(new BorderLayout());			
-		add(t, BorderLayout.LINE_START);
+		add(toolBar, BorderLayout.LINE_START);
 		
-		getContentPane().add(new JScrollPane(holderPanel), BorderLayout.CENTER);
-	
+		JPanel tt=new JPanel(new BorderLayout());
+		tt.add(new JScrollPane(holderPanel), BorderLayout.CENTER);
+		tt.add(result,BorderLayout.SOUTH);
+		getContentPane().add(tt, BorderLayout.CENTER);
 		//add(temp, BorderLayout.CENTER);	
 		
 		
@@ -87,7 +88,7 @@ public class test extends JFrame {
 		 FileNameExtensionFilter blockfilter = new FileNameExtensionFilter("block files (*.block)", "block");
 		 fileChooser.setFileFilter(blockfilter);
 		jpMenuBar=new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JButton btnNew=new JButton("New");
+		JButton btnNew=new JButton("Шинэ файл");
 		btnNew.setFocusable(false);
 		btnNew.addActionListener(new ActionListener(){
 
@@ -99,7 +100,7 @@ public class test extends JFrame {
 			}			
 		});
 		jpMenuBar.add(btnNew);
-		JButton btnSave=new JButton("Save");
+		JButton btnSave=new JButton("Файл хадгалах");
 		btnSave.setFocusable(false);
 		btnSave.addActionListener(new ActionListener(){
 
@@ -110,7 +111,7 @@ public class test extends JFrame {
 			}			
 		});
 		jpMenuBar.add(btnSave);
-		JButton btnOpen=new JButton("Open");
+		JButton btnOpen=new JButton("Файл нээх");
 		btnOpen.setFocusable(false);
 		btnOpen.addActionListener(new ActionListener(){
 
@@ -122,46 +123,39 @@ public class test extends JFrame {
 		jpMenuBar.add(btnOpen);
 		
 		//////////////////debug test////////////////////////
-		JButton btnrun=new JButton("run");
+		JButton btnrun=new JButton("Шалгах");
+		btnrun.setToolTipText("ctrl+F9");
 		btnrun.setFocusable(false);
 		btnrun.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				temp.add(new JLabel("dfff"));
-				System.out.println("dfns,fnsd,");
-				revalidate();
-				repaint();
 				
-				ErrorCheck checker = new ErrorCheck();
-				if (checker.checkForErrors(mainPanel.getStartBlock()) == false) {
-					CodeGenerator g = new CodeGenerator();
-					if (g.generateCode(mainPanel.getStartBlock())) {
+				checkAndRun();
+			}
+
 						
-						// outArea.setText(g.getOutput());
-						
-					} else {
-						// outArea.setText(g.getError());
-					}
-				} else {
-					// errArea.setText(checker.getErrors());
-				}
-			}			
 		});
 		jpMenuBar.add(btnrun);
 		
 		inputs=new HashMap<String, String>();
 		inputPanel=new JPanel(new FlowLayout());
 		
-		
+		this.setMinimumSize(new Dimension(1000, 500));
+		this.setSize(1200, 700);
 		this.add(jpMenuBar,BorderLayout.NORTH);
-		
+		//this.add(result,BorderLayout.SOUTH);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.show();
 		this.repaint();		
 	}
 	public static void main(String[] args) {
 		new test();
+	}
+	private void showError(CodeGenerator g) {
+
+		JOptionPane.showMessageDialog (this, g.getError(),"Алдаатай алгоритм",JOptionPane.ERROR_MESSAGE) ;
+		
 	}
 	public class ToolBar extends JPanel implements MouseListener {
 
@@ -190,6 +184,13 @@ public class test extends JFrame {
 			cc = new EndBlock(3);
 			cc.setLocation(15, 0);
 			tools.add(cc);
+			initTools();
+			
+			
+			
+		}
+		public void initTools(){
+			removeAll();
 			JPanel temp = new JPanel(new GridLayout(7, 1));
 			for (JComponent c : tools) {
 				c.addMouseListener(this);
@@ -253,30 +254,37 @@ public class test extends JFrame {
 	}
 	public void setEditable(boolean edit){
 		mainPanel.setEnabled(edit);
-		for (Component c : t.getTools()) {
-			DrawableBlock b=(DrawableBlock)c;
-			b.setEnabled(edit);
-			if(edit)
-			{
-				b.addMouseListener(t);
+		
+			if(edit){
+				toolBar.initTools();
+				result.removeAll();
 			}
-			else
-				b.removeMouseListener(t);
-		}
-		for (Component c : jpMenuBar.getComponents()) {
-			
+			else{
+				for (Component c : toolBar.getTools()) {
+					
+					if(!edit)
+					{	
+						DrawableBlock b=(DrawableBlock)c;
+						b.setEnabled(edit);
+						b.removeMouseListener(toolBar);
+					}				
+				}
+			}
+		for (Component c : jpMenuBar.getComponents()) {			
 			c.setEnabled(edit);
 		
 		}
+		revalidate();
+		repaint();
 	}
 	  public JMenuBar createMenuBar() {
 	      JMenuBar top_menu_bar = new JMenuBar();
-	      JMenu main_menu = new JMenu("Menu");
+	      JMenu main_menu = new JMenu("Цэс");
 	      main_menu.setMnemonic(KeyEvent.VK_M);
 	      top_menu_bar.add(main_menu);
 	      JMenuItem menu_item;
 
-	      menu_item = new JMenuItem("New file");
+	      menu_item = new JMenuItem("Шинэ файл үүсгэх");
 	      menu_item.setMnemonic(KeyEvent.VK_N);
 	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
 	            ActionEvent.CTRL_MASK));
@@ -291,7 +299,7 @@ public class test extends JFrame {
 	         }
 	      });
 	      main_menu.add(menu_item);
-	      menu_item = new JMenuItem("Open file");
+	      menu_item = new JMenuItem("Файл нээх");
 	      menu_item.setMnemonic(KeyEvent.VK_O);
 	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
 	            ActionEvent.CTRL_MASK));
@@ -306,7 +314,7 @@ public class test extends JFrame {
 	         }
 	      });
 	      main_menu.add(menu_item);
-	      menu_item = new JMenuItem("Save");
+	      menu_item = new JMenuItem("Хадгалах");
 	      menu_item.setMnemonic(KeyEvent.VK_S);
 	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
 	            ActionEvent.CTRL_MASK));
@@ -321,7 +329,7 @@ public class test extends JFrame {
 	         }
 	      });
 	      main_menu.add(menu_item);
-	      menu_item = new JMenuItem("Save as");
+	      menu_item = new JMenuItem("Шинэ нэрээр хадгалах");
 	      menu_item.setActionCommand("save");
 	      menu_item.addActionListener(new ActionListener() {
 
@@ -333,7 +341,19 @@ public class test extends JFrame {
 	         }
 	      });
 	      main_menu.add(menu_item);
+	      
+	      menu_item = new JMenuItem("Шалгах");
+	      menu_item.setMnemonic(KeyEvent.VK_F9);
+	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9,
+	            ActionEvent.CTRL_MASK));
+	      menu_item.addActionListener(new ActionListener() {
 
+	         @Override
+	         public void actionPerformed(ActionEvent arg0) {
+	            checkAndRun();
+	         }
+	      });
+	      main_menu.add(menu_item);
 	      return top_menu_bar;
 	   }
 	  private void saveAs(){
@@ -380,7 +400,6 @@ public class test extends JFrame {
 		// TODO Auto-generated method stub
 	//	super.setEnabled(arg0);
 		  FileEdited='*';
-		  
 	}
 	
 	private int checkFileSaved(){
@@ -397,4 +416,36 @@ public class test extends JFrame {
 		  }
 		 return 0;
 	}
+	private void checkAndRun(){
+		ErrorCheck checker = new ErrorCheck();
+		
+		if (checker.checkForErrors(mainPanel.getStartBlock()) == false) {
+			CodeGenerator g = new CodeGenerator();
+			if (g.generateCode(mainPanel.getStartBlock())) {
+				
+				// outArea.setText(g.getOutput());
+				setEditable(false);
+				result.removeAll();
+				pnlTrace pnl=new pnlTrace(mainPanel,g.getOutput());
+				result.add(pnl,BorderLayout.SOUTH);
+				revalidate();
+				repaint();
+			} else {
+				// outArea.setText(g.getError());
+				showError(g);
+				//System.out.println(g.getError());
+				
+			}
+		} else {
+			// errArea.setText(checker.getErrors());
+			setEditable(false);
+			System.out.println("checker error");
+			result.removeAll();
+			pnlError pnl=new pnlError(mainPanel,checker.getErrors());
+			result.add(pnl,BorderLayout.SOUTH);
+			revalidate();
+			repaint();
+		}
+	}
+	
 }

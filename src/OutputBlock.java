@@ -8,13 +8,11 @@ public class OutputBlock extends DrawableBlock {
 
 	private DrawableBlock before,next;
 	public OutputBlock(){
-		super();
-		TYPE=BLOCKTYPE.OUTPUT;
+		super(BLOCKTYPE.OUTPUT);
 		setText("");
 	}
 	public OutputBlock(int i){
-		super(i);
-		TYPE=BLOCKTYPE.OUTPUT;
+		super(BLOCKTYPE.OUTPUT,i);
 		setText("Хэвлэх");
 	}
 	@Override

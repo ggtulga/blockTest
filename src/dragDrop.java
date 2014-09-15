@@ -25,13 +25,16 @@ public class dragDrop implements MouseMotionListener,MouseListener,Serializable 
 		@Override
 		public void mouseClicked(MouseEvent e) {		
 			DrawableBlock temp=(DrawableBlock)e.getSource();
-			
+			DrawableBlock.CurrentNote=null;
+			DrawableBlock.setSelectedBlock(temp, Color.orange);
 			if(DrawableBlock.firstBLock==null){
 				if(temp.TYPE!=BLOCKTYPE.END){
 					DrawableBlock.firstBLock=temp;
 					DrawableBlock.firstBLock.setColor(Color.red);
 				}
 			}else if(temp.TYPE==BLOCKTYPE.BEGIN||DrawableBlock.firstBLock.equals(temp)){
+				if(DrawableBlock.firstBLock.equals(temp)&&!temp.TYPE.equals(BLOCKTYPE.BEGIN)&&!temp.TYPE.equals(BLOCKTYPE.END))
+					DrawableBlock.CurrentNote=temp;
 				DrawableBlock.firstBLock.setColor(DrawableBlock.firstBLock.getBeforeColor());
 				DrawableBlock.firstBLock=null;
 			}else{

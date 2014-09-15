@@ -7,14 +7,12 @@ import java.awt.KeyEventDispatcher;
 public class ValueBlock extends DrawableBlock{
 	private DrawableBlock before,next;
 	public ValueBlock(){
-		super();
+		super(BLOCKTYPE.VALUE);
 		setText("");
-		TYPE=BLOCKTYPE.VALUE;
 	}
 	public ValueBlock(int i){
-		super(i);
+		super(BLOCKTYPE.VALUE,i);
 		setText("Утга оноох");
-		TYPE=BLOCKTYPE.VALUE;
 	}
 	@Override
 	public void draw(Graphics g) {

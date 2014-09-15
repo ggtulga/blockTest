@@ -422,7 +422,7 @@ public class CodeGenerator {
 			PyList list = (PyList) i.next();
 			lineNumber = Integer.parseInt(list.get(0).toString());
 
-			// Need to substract 2:
+			// Need to substract 2:	
 			// - array starts from 0
 			// - two for the imports
 			if (lineNumber - 3 >= script.size()) {
@@ -450,32 +450,30 @@ public class CodeGenerator {
 		}
 
 		for (int i = 0; i < traces.size(); i++) {
-		    // System.out.println(i + ":");
-		    // switch (traces.get(i).getBlock().TYPE) {
-		    // case BEGIN:
-		    // 	System.out.println("begin");
-		    // 	break;
-		    // case IF:
-		    // 	System.out.println("if");
-		    // 	break;
-		    // case INIT:
-		    // 	System.out.println("init");
-		    // 	break;
-		    // case VALUE:
-		    // 	System.out.println("value");
-		    // 	break;
-		    // case INPUT:
-		    // 	System.out.println("input");
-		    // 	break;
-		    // case OUTPUT:
-		    // 	System.out.println("OUTPUT");
-		    // 	break;
-		    // case END:
-		    // 	System.out.println("end");
-		    // 	break;
-
-		    // }
-		
+		    System.out.println(i + ":");
+		    switch (traces.get(i).getBlock().TYPE) {
+		    case BEGIN:
+		    	System.out.println("begin");
+		    	break;
+		    case IF:
+		     	System.out.println("if");
+		     	break;
+		    case INIT:
+		     	System.out.println("init");
+		     	break;
+		    case VALUE:
+		     	System.out.println("value");
+		     	break;
+		    case INPUT:
+		     	System.out.println("input");
+		     	break;
+		    case OUTPUT:
+		     	System.out.println("OUTPUT");
+		     	break;
+		    case END:
+		     	System.out.println("end");
+		     	break;
+		    }
 		    for (Object k : traces.get(i).getVariables().keySet())
 			System.out.println(k.toString() + ": " + traces.get(i).getVariables().get(k).toString());
 		}

@@ -32,8 +32,12 @@ public class testPanel extends JPanel implements MouseMotionListener,
 	private DrawableBlock newBlock = null;
 	private Point cursorPoint;
 	private Point dragStartPoint = null;
-	private List<DrawableBlock> selectedBlocks;
+	private static List<DrawableBlock> selectedBlocks;
+	
+
 	private Rectangle selectedRec = null;
+	private test parent;
+	
 	@Override
 	public void setEnabled(boolean enabled) {
 		// TODO Auto-generated method stub
@@ -43,15 +47,15 @@ public class testPanel extends JPanel implements MouseMotionListener,
 			this.addMouseListener(this);			
 		}
 		else{
-			this.removeMouseListener(null);
-			this.removeMouseMotionListener(null);
+			this.removeMouseListener(this);
+			this.removeMouseMotionListener(this);
 		}
 		for(Component c:getComponents()){
 			DrawableBlock block=(DrawableBlock) c;
 			block.setEnabled(enabled);
 		}
 	}
-	public testPanel() {
+	public testPanel(test parent) {
 		setLayout(null);		
 		this.addMouseMotionListener(this);
 		this.addMouseListener(this);
@@ -59,6 +63,7 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		selectedBlocks = new ArrayList<>();
 		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         manager.addKeyEventDispatcher(new MyDispacher());
+        this.parent=parent;
 	}
 	
 	public void newPanel(){
@@ -78,7 +83,9 @@ public class testPanel extends JPanel implements MouseMotionListener,
 			}
 		}
 		FileOutputStream fout;
-		
+		DrawableBlock.CurrentNote = null;
+		DrawableBlock.firstBLock = null;
+		DrawableBlock.SelectedBlock=null;
 		try {			
 
             String fname = file.getAbsolutePath();
@@ -123,11 +130,26 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		        	//drawableBlock.initListners();
 		        	//drawableBlock.initMenu();
 					add(drawableBlock);
+					if(drawableBlock.TYPE.equals(BLOCKTYPE.BEGIN))
+						startBlock=drawableBlock;
 					System.out.println(drawableBlock);
 					if((drawableBlock.getLocation().x+drawableBlock.getWidth())>getWidth())
 						setPreferredSize(new Dimension((drawableBlock.getLocation().x+drawableBlock.getWidth()), getHeight()));
 					if((drawableBlock.getLocation().y+drawableBlock.getHeight())>getHeight())
 						setPreferredSize(new Dimension(getWidth(), (drawableBlock.getLocation().y+drawableBlock.getHeight())));
+					
+					
+					Rectangle cont=new Rectangle(getSize());
+					Rectangle obj=new Rectangle(drawableBlock.getLocation().x, drawableBlock.getLocation().y, drawableBlock.getWidth(), drawableBlock.getHeight());
+					
+					if(!cont.contains(obj))
+					{
+						int w=(int) (obj.getWidth()+obj.getX());
+						int h=(int) (obj.getHeight()+obj.getY());
+						if(w<getWidth())	w=getWidth();
+						if(h<getHeight())	h=getHeight();
+						setPreferredSize(new Dimension(w,h));
+					}
 					
 				}
 		      }
@@ -140,7 +162,8 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		    }
 		    catch(IOException ex){
 		    }
-		revalidate();repaint();
+		revalidate();
+		repaint();
 	}
 	
 	public DrawableBlock getStartBlock() {
@@ -162,8 +185,10 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		if (DrawableBlock.firstBLock != null) {
 			g.setColor(Color.blue);
 			OutputLines line = new OutputLines(DrawableBlock.firstBLock);
+			try{
 			line.drawLine(DrawableBlock.firstBLock.getOutputPoint(),
 					cursorPoint, g);
+			}catch(Exception e){}
 		}
 		if (selectedRec != null) {
 			g.setColor(Color.yellow);
@@ -203,7 +228,7 @@ public class testPanel extends JPanel implements MouseMotionListener,
 			}
 		}
 	}
-
+	
 	private void selectBlocks() {
 		selectedBlocks.clear();		
 		for (Component b : getComponents()) {
@@ -223,7 +248,7 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		repaint();
 	}
 
-	private void deSelectBlocks() {
+	public void deSelectBlocks() {
 
 		for (DrawableBlock block : selectedBlocks) {
 
@@ -232,7 +257,6 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		selectedBlocks.clear();
 		selectedRec = null;
 		repaint();
-		System.out.println("*******");
 		dragStartPoint = null;
 	}
 
@@ -257,12 +281,14 @@ public class testPanel extends JPanel implements MouseMotionListener,
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		if(DrawableBlock.getSelectedBlock()!=null)
+			DrawableBlock.setSelectedBlock(null, null);
 		if(DrawableBlock.CurrentNote!=null){
 			DrawableBlock.CurrentNote.setFont(new Font(Font.MONOSPACED, Font.ITALIC
 					| Font.BOLD, 14));
 			DrawableBlock.CurrentNote.setColor(Color.black);
 			DrawableBlock.CurrentNote = null;
-		}		
+		}	
 		if (newBlock != null) {
 			DrawableBlock b;
 			if (newBlock.TYPE == BLOCKTYPE.END)
@@ -331,6 +357,10 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		DrawableBlock.setSelectedBlock(block, Color.GREEN);
 	}
 	
-	
-
+	public test getparent() {
+		return parent;
+	}
+	public static List<DrawableBlock> getSelectedBlocks() {
+		return selectedBlocks;
+	}
 }

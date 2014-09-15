@@ -8,13 +8,11 @@ public class InitBlock extends DrawableBlock {
 
 	private DrawableBlock before,next;
 	public InitBlock(){
-		super();
-		TYPE=BLOCKTYPE.INIT;
+		super(BLOCKTYPE.INIT);
 		setText("");
 	}
 	public InitBlock(int i){
-		super(i);
-		TYPE=BLOCKTYPE.INIT;
+		super(BLOCKTYPE.INIT,i);
 		setText("Зарлах");
 	}
 	@Override

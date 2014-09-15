@@ -9,13 +9,14 @@ public class EndBlock extends DrawableBlock {
 
 	private DrawableBlock before;
 	public EndBlock(){
-		super();
+		super(BLOCKTYPE.END);
 		setText("End");
-		TYPE=BLOCKTYPE.END;
+		//TYPE=BLOCKTYPE.END;
+		System.out.println("--");
+		System.out.println(TYPE);
 	}
 	public EndBlock(int i){
-		super(i);
-		TYPE=BLOCKTYPE.END;
+		super(BLOCKTYPE.END,i);
 	}
 	@Override
 	public void draw(Graphics g) {
