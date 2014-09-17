@@ -17,8 +17,30 @@ public class JythonFactory {
 
 		Object javaInt = null;
 		PythonInterpreter interpreter = new PythonInterpreter();
+
+		try {
+			interpreter.execfile(JythonFactory.class.getResourceAsStream(pathToJythonModule));
+		} catch (org.python.core.PyException e) {
+			if (e.value instanceof org.python.core.PyInstance) {
+				Object javaError = e.value.__tojava__(Throwable.class);
+				if (javaError != null && javaError != org.python.core.Py.NoConversion) {
+					if (javaError instanceof OutOfMemoryError) {
+						throw (OutOfMemoryError) javaError;
+					} else if (javaError instanceof StackOverflowError) {
+						throw (StackOverflowError) javaError;
+					} 
+					
+					// throw (Throwable) javaError;
+				}
+			}
+			
+			// if (Py.matchException(e, Py.KeyboardInterrupt)) {
+			// 	throw new InterruptedException(
+			// 		"Interupted while executing Jython script.");
+			// }
+			throw e;
+		}
 		
-		interpreter.execfile(JythonFactory.class.getResourceAsStream(pathToJythonModule));
 		String tempName = pathToJythonModule.substring(pathToJythonModule.lastIndexOf("/")+1);
 		tempName = tempName.substring(0, tempName.indexOf("."));
 		System.out.println(tempName);

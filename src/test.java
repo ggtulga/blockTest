@@ -451,5 +451,5 @@ public class test extends JFrame {
 			repaint();
 		}
 	}
-	
+
 }

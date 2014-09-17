@@ -443,10 +443,12 @@ public class CodeGenerator {
 			return false;
 		} catch (Exception e) {
 			Log.log(e);
+			Log.log(e.toString());
+			Log.log(trace);
 			errs.add(new ErrorMessage(14, null));
 			return false;
 		}
-		
+
 		Log.log(trace);
 		int lineNumber;
 		for (Iterator<PyList> i = trace.iterator(); i.hasNext(); ) {
@@ -559,5 +561,4 @@ public class CodeGenerator {
 	public ArrayList<ErrorMessage> getErrors() {
 		return errs;
 	}
-
 }
