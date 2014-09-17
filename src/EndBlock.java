@@ -12,8 +12,8 @@ public class EndBlock extends DrawableBlock {
 		super(BLOCKTYPE.END);
 		setText("End");
 		//TYPE=BLOCKTYPE.END;
-		System.out.println("--");
-		System.out.println(TYPE);
+		Log.log("--");
+		Log.log(TYPE);
 	}
 	public EndBlock(int i){
 		super(BLOCKTYPE.END,i);

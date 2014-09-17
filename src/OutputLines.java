@@ -40,24 +40,24 @@ public class OutputLines {
 				}
 			}else if(source.y>(destination.y+block.getHeight())){
 				if(source.x>destination.x){
-						g.drawLine(source.x, source.y, source.x+block.getWidth()+10, source.y);
-						g.drawLine(source.x+block.getWidth()+10, destination.y, source.x+block.getWidth()+10, source.y);
-						g.drawLine(source.x+block.getWidth()+10, destination.y, destination.x, destination.y);
-					}else{
-						g.drawLine(source.x, source.y, source.x-block.getWidth()-10, source.y);
-						g.drawLine(source.x-block.getWidth()-10, destination.y, source.x-block.getWidth()-10, source.y);
-						g.drawLine(source.x-block.getWidth()-10, destination.y, destination.x, destination.y);
-					}
+					g.drawLine(source.x, source.y, source.x+block.getWidth()+10, source.y);
+					g.drawLine(source.x+block.getWidth()+10, destination.y, source.x+block.getWidth()+10, source.y);
+					g.drawLine(source.x+block.getWidth()+10, destination.y, destination.x, destination.y);
 				}else{
-					if(source.x<destination.x){
-						g.drawLine(source.x, source.y, source.x+block.getWidth()+10, source.y);
-						g.drawLine(source.x+block.getWidth()+10, destination.y, source.x+block.getWidth()+10, source.y);
-						g.drawLine(source.x+block.getWidth()+10, destination.y, destination.x, destination.y);
-					}else{
-						g.drawLine(source.x, source.y, source.x-block.getWidth()-10, source.y);
-						g.drawLine(source.x-block.getWidth()-10, destination.y, source.x-block.getWidth()-10, source.y);
-						g.drawLine(source.x-block.getWidth()-10, destination.y, destination.x, destination.y);
-					}
+					g.drawLine(source.x, source.y, source.x-block.getWidth()-10, source.y);
+					g.drawLine(source.x-block.getWidth()-10, destination.y, source.x-block.getWidth()-10, source.y);
+					g.drawLine(source.x-block.getWidth()-10, destination.y, destination.x, destination.y);
+				}
+			}else{
+				if(source.x<destination.x){
+					g.drawLine(source.x, source.y, source.x+block.getWidth()+10, source.y);
+					g.drawLine(source.x+block.getWidth()+10, destination.y, source.x+block.getWidth()+10, source.y);
+					g.drawLine(source.x+block.getWidth()+10, destination.y, destination.x, destination.y);
+				}else{
+					g.drawLine(source.x, source.y, source.x-block.getWidth()-10, source.y);
+					g.drawLine(source.x-block.getWidth()-10, destination.y, source.x-block.getWidth()-10, source.y);
+					g.drawLine(source.x-block.getWidth()-10, destination.y, destination.x, destination.y);
+				}
 			}
 		}
 	}

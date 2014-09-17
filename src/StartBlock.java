@@ -6,7 +6,7 @@ import java.awt.Point;
 
 
 public class StartBlock extends DrawableBlock{
-	private DrawableBlock next;
+
 	public StartBlock(){
 		super(BLOCKTYPE.BEGIN);
 		setText("");
@@ -29,7 +29,7 @@ public class StartBlock extends DrawableBlock{
 		g.drawLine(15, 30, getWidth() - 15, 30);
 		g.drawString("Эхлэл", 15, 20);
 		g.drawLine(getWidth() / 2, getHeight() - 10, getWidth() / 2,
-				getHeight());		
+			   getHeight());		
 	}
 	@Override
 	public Point getInputPoint() {

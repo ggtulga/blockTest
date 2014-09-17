@@ -7,15 +7,17 @@ import traceback
 import types
 import cStringIO
 import bdb
+import copy
 
 DEBUG = True
+MAX_LINES = 300
 
 class Logger(bdb.Bdb, LoggerType):
 
     def __init__(self):
         bdb.Bdb.__init__(self)
         self.globals = {}
-        self.order = []
+        # self.order = []
         self.trace = []
         self.lineno = -1
 
@@ -79,6 +81,10 @@ class Logger(bdb.Bdb, LoggerType):
             return
 
         self.lineno = frame.f_lineno
+
+        if len(self.trace) > MAX_LINES:
+            self.globals["__error_max_line__"] = True
+            raise bdb.BdbQuit
         
         for i, v in frame.f_globals.items():
             if i == '__builtins__' or i == 'sys' or i == 'JOptionPane':
@@ -86,10 +92,10 @@ class Logger(bdb.Bdb, LoggerType):
 
             if i == '__user_stdout__':
                 self.globals[i] = v.getvalue()
+            elif i == '__init_array__':
+                continue    # exclude __init_array__ variable used for internal
             else:
-                if i not in self.globals:
-                    self.order.append(i)
-                self.globals[i] = v
+                self.globals[i] = copy.copy(v);
         
         self.trace.append([self.lineno, dict.copy(self.globals)])
         

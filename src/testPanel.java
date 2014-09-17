@@ -25,7 +25,7 @@ import java.util.List;
 import javax.swing.JPanel;
 
 public class testPanel extends JPanel implements MouseMotionListener,
-		MouseListener {
+				      MouseListener {
 
 	private static final long serialVersionUID = 1L;
 	private DrawableBlock startBlock;
@@ -62,8 +62,8 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		setBackground(Color.white);
 		selectedBlocks = new ArrayList<>();
 		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        manager.addKeyEventDispatcher(new MyDispacher());
-        this.parent=parent;
+		manager.addKeyEventDispatcher(new MyDispacher());
+		this.parent=parent;
 	}
 	
 	public void newPanel(){
@@ -88,51 +88,49 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		DrawableBlock.SelectedBlock=null;
 		try {			
 
-            String fname = file.getAbsolutePath();
+			String fname = file.getAbsolutePath();
 
-            if(!fname.endsWith(".block") ) {
-                file = new File(fname + ".block");
-            }
+			if(!fname.endsWith(".block") ) {
+				file = new File(fname + ".block");
+			}
 
 			fout = new FileOutputStream(file);
 			ObjectOutputStream oos = new ObjectOutputStream(fout);
 			try{
 				oos.writeObject(temp);
-				}
+			}
 			finally{
 				fout.close();
-		      }
+			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.log(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.log(e);
 		}
 		
 		
 	}	
 	
 	public void openFile(File file){
-		//filename="d:\\address.txt";
+
 		removeAll();
 		 
 		try{
-		      //use buffering
-		      InputStream filei = new FileInputStream(file);
-		      InputStream buffer = new BufferedInputStream(filei);
-		      ObjectInput input = new ObjectInputStream (buffer);
-		      try{
-		        //deserialize the List
-		    	  List<DrawableBlock> recoveredQuarks = (List<DrawableBlock>)input.readObject();
-		        //display its data
-		        for (DrawableBlock drawableBlock : recoveredQuarks) {
-		        	//drawableBlock.initListners();
-		        	//drawableBlock.initMenu();
+			//use buffering
+			InputStream filei = new FileInputStream(file);
+			InputStream buffer = new BufferedInputStream(filei);
+			ObjectInput input = new ObjectInputStream (buffer);
+			try{
+				//deserialize the List
+				List<DrawableBlock> recoveredQuarks = (List<DrawableBlock>)input.readObject();
+				//display its data
+				for (DrawableBlock drawableBlock : recoveredQuarks) {
+					//drawableBlock.initListners();
+					//drawableBlock.initMenu();
 					add(drawableBlock);
 					if(drawableBlock.TYPE.equals(BLOCKTYPE.BEGIN))
-						startBlock=drawableBlock;
-					System.out.println(drawableBlock);
+						startBlock = drawableBlock;
+					Log.log(drawableBlock);
 					if((drawableBlock.getLocation().x+drawableBlock.getWidth())>getWidth())
 						setPreferredSize(new Dimension((drawableBlock.getLocation().x+drawableBlock.getWidth()), getHeight()));
 					if((drawableBlock.getLocation().y+drawableBlock.getHeight())>getHeight())
@@ -152,16 +150,16 @@ public class testPanel extends JPanel implements MouseMotionListener,
 					}
 					
 				}
-		      }
-		      finally{
-		        input.close();
-		      }
-		    }
-		    catch(ClassNotFoundException ex){
+			}
+			finally{
+				input.close();
+			}
+		}
+		catch(ClassNotFoundException ex){
 		      
-		    }
-		    catch(IOException ex){
-		    }
+		}
+		catch(IOException ex){
+		}
 		revalidate();
 		repaint();
 	}
@@ -186,14 +184,14 @@ public class testPanel extends JPanel implements MouseMotionListener,
 			g.setColor(Color.blue);
 			OutputLines line = new OutputLines(DrawableBlock.firstBLock);
 			try{
-			line.drawLine(DrawableBlock.firstBLock.getOutputPoint(),
-					cursorPoint, g);
+				line.drawLine(DrawableBlock.firstBLock.getOutputPoint(),
+					      cursorPoint, g);
 			}catch(Exception e){}
 		}
 		if (selectedRec != null) {
 			g.setColor(Color.yellow);
 			g.drawRect(selectedRec.x, selectedRec.y, selectedRec.width,
-					selectedRec.height);
+				   selectedRec.height);
 		}
 	}
 
@@ -204,8 +202,8 @@ public class testPanel extends JPanel implements MouseMotionListener,
 			dragStartPoint = cursorPoint;
 		} 
 		if (selectedBlocks.size() > 0) {			
-			System.out.println(selectedRec);
-			System.out.println(getBounds());
+			Log.log(selectedRec);
+			Log.log(getBounds());
 			if (getBounds().contains(selectedRec)&&selectedRec.contains(cursorPoint)) 
 			{	
 				Point p=new Point();
@@ -285,7 +283,7 @@ public class testPanel extends JPanel implements MouseMotionListener,
 			DrawableBlock.setSelectedBlock(null, null);
 		if(DrawableBlock.CurrentNote!=null){
 			DrawableBlock.CurrentNote.setFont(new Font(Font.MONOSPACED, Font.ITALIC
-					| Font.BOLD, 14));
+								   | Font.BOLD, 14));
 			DrawableBlock.CurrentNote.setColor(Color.black);
 			DrawableBlock.CurrentNote = null;
 		}	
@@ -332,8 +330,8 @@ public class testPanel extends JPanel implements MouseMotionListener,
 	public void mouseReleased(MouseEvent e) {
 		if (dragStartPoint != null && selectedRec==null) {
 			selectedRec = new Rectangle(dragStartPoint.x, dragStartPoint.y,
-					cursorPoint.x - dragStartPoint.x, cursorPoint.y
-							- dragStartPoint.y);
+						    cursorPoint.x - dragStartPoint.x, cursorPoint.y
+						    - dragStartPoint.y);
 			selectBlocks();
 		}else {
 			

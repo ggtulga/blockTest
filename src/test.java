@@ -59,9 +59,9 @@ public class test extends JFrame {
 		JPanel holderPanel = new JPanel(new BorderLayout());
 		holderPanel.add(temp, BorderLayout.NORTH);
 		setLayout(new BorderLayout());
-	      //Size(1000,1000);
+		//Size(1000,1000);
 		TitledBorder title = BorderFactory.createTitledBorder(
-				BorderFactory.createLoweredBevelBorder(), " ");
+			BorderFactory.createLoweredBevelBorder(), " ");
 		title.setTitlePosition(TitledBorder.CENTER);
 		setJMenuBar(createMenuBar());
 		
@@ -85,41 +85,41 @@ public class test extends JFrame {
 		
 		
 		fileChooser=new JFileChooser();
-		 FileNameExtensionFilter blockfilter = new FileNameExtensionFilter("block files (*.block)", "block");
-		 fileChooser.setFileFilter(blockfilter);
+		FileNameExtensionFilter blockfilter = new FileNameExtensionFilter("block files (*.block)", "block");
+		fileChooser.setFileFilter(blockfilter);
 		jpMenuBar=new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JButton btnNew=new JButton("Шинэ файл");
 		btnNew.setFocusable(false);
 		btnNew.addActionListener(new ActionListener(){
 
-			@Override
-			public void actionPerformed(ActionEvent e) {	
+				@Override
+				public void actionPerformed(ActionEvent e) {	
 
-				newp();
+					newp();
 				
-			}			
-		});
+				}			
+			});
 		jpMenuBar.add(btnNew);
 		JButton btnSave=new JButton("Файл хадгалах");
 		btnSave.setFocusable(false);
 		btnSave.addActionListener(new ActionListener(){
 
-			@Override
-			public void actionPerformed(ActionEvent e) {	
+				@Override
+				public void actionPerformed(ActionEvent e) {	
 
-				save();
-			}			
-		});
+					save();
+				}			
+			});
 		jpMenuBar.add(btnSave);
 		JButton btnOpen=new JButton("Файл нээх");
 		btnOpen.setFocusable(false);
 		btnOpen.addActionListener(new ActionListener(){
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				open();
-			}			
-		});
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					open();
+				}			
+			});
 		jpMenuBar.add(btnOpen);
 		
 		//////////////////debug test////////////////////////
@@ -128,14 +128,15 @@ public class test extends JFrame {
 		btnrun.setFocusable(false);
 		btnrun.addActionListener(new ActionListener(){
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				checkAndRun();
-			}
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// DrawableBlock.setSelectedBlock(null, null);
+					DrawableBlock.CurrentNote = null;
+					checkAndRun();
+				}
 
 						
-		});
+			});
 		jpMenuBar.add(btnrun);
 		
 		inputs=new HashMap<String, String>();
@@ -153,8 +154,15 @@ public class test extends JFrame {
 		new test();
 	}
 	private void showError(CodeGenerator g) {
+		setEditable(false);
+		Log.log("checker error");
+		result.removeAll();
+		pnlError pnl = new pnlError(mainPanel, g.getErrors());
+		result.add(pnl, BorderLayout.SOUTH);
+		revalidate();
+		repaint();
 
-		JOptionPane.showMessageDialog (this, g.getError(),"Алдаатай алгоритм",JOptionPane.ERROR_MESSAGE) ;
+		// JOptionPane.showMessageDialog (this, g.getError(), "Алдаатай алгоритм", JOptionPane.ERROR_MESSAGE);
 		
 	}
 	public class ToolBar extends JPanel implements MouseListener {
@@ -201,10 +209,13 @@ public class test extends JFrame {
 
 				temp.add(t);
 			}
-			System.out.println(temp.getHeight());
+			
+			Log.log(temp.getHeight());
+
+			
 			temp.setSize(100, 1000);
 			TitledBorder title = BorderFactory.createTitledBorder(
-					BorderFactory.createLoweredBevelBorder(), "Блокууд");
+				BorderFactory.createLoweredBevelBorder(), "Блокууд");
 			title.setTitlePosition(TitledBorder.CENTER);
 			temp.setBorder(title);
 			temp.add(new JLabel("                                     "));
@@ -230,8 +241,8 @@ public class test extends JFrame {
 				block.setColor(Color.red);
 				if(mainPanel.getNewBlock()!=null)
 					mainPanel.getNewBlock().setColor(Color.black);
-					mainPanel.setNewBlock(block);
-					setEdited();
+				mainPanel.setNewBlock(block);
+				setEdited();
 			}
 		}
 
@@ -255,21 +266,21 @@ public class test extends JFrame {
 	public void setEditable(boolean edit){
 		mainPanel.setEnabled(edit);
 		
-			if(edit){
-				toolBar.initTools();
-				result.removeAll();
-			}
-			else{
-				for (Component c : toolBar.getTools()) {
+		if(edit){
+			toolBar.initTools();
+			result.removeAll();
+		}
+		else{
+			for (Component c : toolBar.getTools()) {
 					
-					if(!edit)
-					{	
-						DrawableBlock b=(DrawableBlock)c;
-						b.setEnabled(edit);
-						b.removeMouseListener(toolBar);
-					}				
-				}
+				if(!edit)
+				{	
+					DrawableBlock b=(DrawableBlock)c;
+					b.setEnabled(edit);
+					b.removeMouseListener(toolBar);
+				}				
 			}
+		}
 		for (Component c : jpMenuBar.getComponents()) {			
 			c.setEnabled(edit);
 		
@@ -277,144 +288,142 @@ public class test extends JFrame {
 		revalidate();
 		repaint();
 	}
-	  public JMenuBar createMenuBar() {
-	      JMenuBar top_menu_bar = new JMenuBar();
-	      JMenu main_menu = new JMenu("Цэс");
-	      main_menu.setMnemonic(KeyEvent.VK_M);
-	      top_menu_bar.add(main_menu);
-	      JMenuItem menu_item;
+	public JMenuBar createMenuBar() {
+		JMenuBar top_menu_bar = new JMenuBar();
+		JMenu main_menu = new JMenu("Цэс");
+		main_menu.setMnemonic(KeyEvent.VK_M);
+		top_menu_bar.add(main_menu);
+		JMenuItem menu_item;
 
-	      menu_item = new JMenuItem("Шинэ файл үүсгэх");
-	      menu_item.setMnemonic(KeyEvent.VK_N);
-	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
-	            ActionEvent.CTRL_MASK));
-	      menu_item.setActionCommand("new");
-	      menu_item.addActionListener(new ActionListener() {
+		menu_item = new JMenuItem("Шинэ файл үүсгэх");
+		menu_item.setMnemonic(KeyEvent.VK_N);
+		menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+								ActionEvent.CTRL_MASK));
+		menu_item.setActionCommand("new");
+		menu_item.addActionListener(new ActionListener() {
 
-	         @Override
-	         public void actionPerformed(ActionEvent arg0) {
-	            if(arg0.getActionCommand().equals("save")){
-	            	newp();
-	            }
-	         }
-	      });
-	      main_menu.add(menu_item);
-	      menu_item = new JMenuItem("Файл нээх");
-	      menu_item.setMnemonic(KeyEvent.VK_O);
-	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-	            ActionEvent.CTRL_MASK));
-	      menu_item.setActionCommand("open");
-	      menu_item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if(arg0.getActionCommand().equals("save")){
+						newp();
+					}
+				}
+			});
+		main_menu.add(menu_item);
+		menu_item = new JMenuItem("Файл нээх");
+		menu_item.setMnemonic(KeyEvent.VK_O);
+		menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+								ActionEvent.CTRL_MASK));
+		menu_item.setActionCommand("open");
+		menu_item.addActionListener(new ActionListener() {
 
-	         @Override
-	         public void actionPerformed(ActionEvent arg0) {
-	            if(arg0.getActionCommand().equals("open")){
-	            	open();
-	            }
-	         }
-	      });
-	      main_menu.add(menu_item);
-	      menu_item = new JMenuItem("Хадгалах");
-	      menu_item.setMnemonic(KeyEvent.VK_S);
-	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-	            ActionEvent.CTRL_MASK));
-	      menu_item.setActionCommand("save");
-	      menu_item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if(arg0.getActionCommand().equals("open")){
+						open();
+					}
+				}
+			});
+		main_menu.add(menu_item);
+		menu_item = new JMenuItem("Хадгалах");
+		menu_item.setMnemonic(KeyEvent.VK_S);
+		menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+								ActionEvent.CTRL_MASK));
+		menu_item.setActionCommand("save");
+		menu_item.addActionListener(new ActionListener() {
 
-	         @Override
-	         public void actionPerformed(ActionEvent arg0) {
-	            if(arg0.getActionCommand().equals("save")){
-	            	save();
-	            }
-	         }
-	      });
-	      main_menu.add(menu_item);
-	      menu_item = new JMenuItem("Шинэ нэрээр хадгалах");
-	      menu_item.setActionCommand("save");
-	      menu_item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if(arg0.getActionCommand().equals("save")){
+						save();
+					}
+				}
+			});
+		main_menu.add(menu_item);
+		menu_item = new JMenuItem("Шинэ нэрээр хадгалах");
+		menu_item.setActionCommand("save");
+		menu_item.addActionListener(new ActionListener() {
 
-	         @Override
-	         public void actionPerformed(ActionEvent arg0) {
-	            if(arg0.getActionCommand().equals("save")){
-	            	saveAs();
-	            }
-	         }
-	      });
-	      main_menu.add(menu_item);
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if(arg0.getActionCommand().equals("save")){
+						saveAs();
+					}
+				}
+			});
+		main_menu.add(menu_item);
 	      
-	      menu_item = new JMenuItem("Шалгах");
-	      menu_item.setMnemonic(KeyEvent.VK_F9);
-	      menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9,
-	            ActionEvent.CTRL_MASK));
-	      menu_item.addActionListener(new ActionListener() {
+		menu_item = new JMenuItem("Шалгах");
+		menu_item.setMnemonic(KeyEvent.VK_F9);
+		menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9,
+								ActionEvent.CTRL_MASK));
+		menu_item.addActionListener(new ActionListener() {
 
-	         @Override
-	         public void actionPerformed(ActionEvent arg0) {
-	            checkAndRun();
-	         }
-	      });
-	      main_menu.add(menu_item);
-	      return top_menu_bar;
-	   }
-	  private void saveAs(){
-		  int returnVal = fileChooser.showSaveDialog(mainPanel);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-            currentFile = fileChooser.getSelectedFile();
-				mainPanel.savePanel(currentFile);
-				repaint();
-				setTitle(TITEL+" - "+currentFile.getAbsolutePath());
-				FileEdited=' ';
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					checkAndRun();
+				}
+			});
+		main_menu.add(menu_item);
+		return top_menu_bar;
+	}
+	private void saveAs(){
+		int returnVal = fileChooser.showSaveDialog(mainPanel);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			currentFile = fileChooser.getSelectedFile();
+			mainPanel.savePanel(currentFile);
+			repaint();
+			setTitle(TITEL+" - "+currentFile.getAbsolutePath());
+			FileEdited=' ';
 				
-        } 
-	  }
-	  private void save(){
-		  if(currentFile==null)
-			  saveAs();
-		  else
-			  mainPanel.savePanel(currentFile);
-		  FileEdited=' ';
-	  }
-	  private void open(){
-		 if(checkFileSaved()==1||FileEdited==' ')
-		 {
-		  int returnVal = fileChooser.showOpenDialog(mainPanel);
+		} 
+	}
+	private void save(){
+		if(currentFile==null)
+			saveAs();
+		else
+			mainPanel.savePanel(currentFile);
+		FileEdited=' ';
+	}
+	private void open(){
+		if(checkFileSaved()==1||FileEdited==' ')
+		{
+			int returnVal = fileChooser.showOpenDialog(mainPanel);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
-              currentFile = fileChooser.getSelectedFile();
-              mainPanel.openFile(currentFile);
-			  repaint();
-			  FileEdited=' ';
-			  setTitle(TITEL+" - "+currentFile.getAbsolutePath());
-          }
-		 }
-	  }
-	  private void newp(){
-		  if(checkFileSaved()==1||FileEdited==' ')
-			 {
-			  mainPanel.newPanel();
-			  currentFile=null;
-			  setTitle(TITEL);
-			 }
-	  }
+				currentFile = fileChooser.getSelectedFile();
+				mainPanel.openFile(currentFile);
+				repaint();
+				FileEdited=' ';
+				setTitle(TITEL+" - "+currentFile.getAbsolutePath());
+			}
+		}
+	}
+	private void newp(){
+		if(checkFileSaved()==1||FileEdited==' ')
+		{
+			mainPanel.newPanel();
+			currentFile=null;
+			setTitle(TITEL);
+		}
+	}
 	 
 	public static void setEdited() {
-		// TODO Auto-generated method stub
-	//	super.setEnabled(arg0);
-		  FileEdited='*';
+		FileEdited='*';
 	}
 	
 	private int checkFileSaved(){
-		 if(FileEdited!=' '){
-			  String msg="Баримтыг хадгалах уу?";
-			  if(currentFile!=null)
-				  msg=currentFile.getName()+ "-д өөрчлөлт орсон байна. өөрчлөлтийг хадгалах уу?";
-			  int result=JOptionPane.showConfirmDialog(this, msg,"Анхааруулга", JOptionPane.YES_NO_OPTION);
-			  if(result==JOptionPane.YES_OPTION){
-				  save();
-				  return 1;
-			  }else if(result==JOptionPane.NO_OPTION)
-				  return 1;
-		  }
-		 return 0;
+		if(FileEdited!=' '){
+			String msg="Баримтыг хадгалах уу?";
+			if(currentFile!=null)
+				msg=currentFile.getName()+ "-д өөрчлөлт орсон байна. өөрчлөлтийг хадгалах уу?";
+			int result=JOptionPane.showConfirmDialog(this, msg,"Анхааруулга", JOptionPane.YES_NO_OPTION);
+			if(result==JOptionPane.YES_OPTION){
+				save();
+				return 1;
+			}else if(result==JOptionPane.NO_OPTION)
+				return 1;
+		}
+		return 0;
 	}
 	private void checkAndRun(){
 		ErrorCheck checker = new ErrorCheck();
@@ -423,7 +432,6 @@ public class test extends JFrame {
 			CodeGenerator g = new CodeGenerator();
 			if (g.generateCode(mainPanel.getStartBlock())) {
 				
-				// outArea.setText(g.getOutput());
 				setEditable(false);
 				result.removeAll();
 				pnlTrace pnl=new pnlTrace(mainPanel,g.getOutput());
@@ -431,18 +439,14 @@ public class test extends JFrame {
 				revalidate();
 				repaint();
 			} else {
-				// outArea.setText(g.getError());
 				showError(g);
-				//System.out.println(g.getError());
-				
 			}
 		} else {
-			// errArea.setText(checker.getErrors());
 			setEditable(false);
-			System.out.println("checker error");
+			Log.log("checker error");
 			result.removeAll();
-			pnlError pnl=new pnlError(mainPanel,checker.getErrors());
-			result.add(pnl,BorderLayout.SOUTH);
+			pnlError pnl = new pnlError(mainPanel, checker.getErrors());
+			result.add(pnl, BorderLayout.SOUTH);
 			revalidate();
 			repaint();
 		}

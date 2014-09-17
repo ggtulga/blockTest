@@ -102,7 +102,7 @@ public class CodeGenerator {
 	/**
 	 * stores errors encountered to process blocks.
 	 */
-	String err;
+	ArrayList<ErrorMessage> errs;
 
 	// Each element of which describes a trace;
 	ArrayList<BlockTrace> traces;
@@ -120,7 +120,7 @@ public class CodeGenerator {
 
 		if (p == null) {
 			// this shouldn't happen
-			System.err.println("Wrong end loop detection\n");
+			Log.log("Wrong end loop detection\n");
 		} else {
 			// p is a "if" block to break out of the loop
 			p.isEndLoop = true;
@@ -229,7 +229,7 @@ public class CodeGenerator {
 
 		if (v.TYPE == BLOCKTYPE.INIT) {
 			// Let's do a nice thing by separating declarations by commas
-			int s = 0, f = 0, x, y, size;
+			int s = 0, f = 0, x, y;
 			String c = v.getText(), tmp = "";
 			HashMap<String, String> vars = new HashMap<String, String>();
 			while (true) {
@@ -242,8 +242,22 @@ public class CodeGenerator {
 				x = tmp.indexOf('[');
 				if (x != -1) {
 					// it's an array
-					y = tmp.indexOf(']', x + 1);
-					vars.put(tmp.substring(0, x), "[None]*" + tmp.substring(x + 1, y));
+					ArrayList<String> sizes = new ArrayList<String>();
+					String arrayName = tmp.substring(0, x), val;
+					// Array can be multiple dimension, therefore needs to be written as follows
+					// eg. [[None for i in range(3)] for i in range(4)] for 3x4 size array
+					while (x != -1) {
+						y = tmp.indexOf(']', x + 1);
+						sizes.add(tmp.substring(x + 1, y));
+						// find the size of the next dimension
+						x = tmp.indexOf('[', x + 1);
+					}
+
+					val = "None";
+					for (int i = sizes.size() - 1; i >= 0; i--)
+						val = '[' + val + " for __init_array__ in range(" + sizes.get(i) + ")]";
+						
+					vars.put(arrayName, val);
 				} else {
 					vars.put(tmp, "None");
 				}
@@ -381,7 +395,7 @@ public class CodeGenerator {
 				script.add(lineNumber, new LineCode(line));
 				lineNumber++;
 
-				System.out.println(substr);
+				Log.log(substr);
 				if (f == tmp.length())
 					break;
 
@@ -407,16 +421,33 @@ public class CodeGenerator {
 		lineNumber = 0;
 		script.clear();
 		output = "";
-		err = "";
+		errs.clear();
 		traces.clear();
 	}
 
-	private void runPythonScript(String s) {
+	private boolean runPythonScript(String s) {
 		String jarPath = JythonFactory.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		LoggerType logger = (LoggerType) jf.getJythonObject(
-				"LoggerType", "logger.py");
-		PyList trace = logger.run_script(s); 
-		System.out.println(trace);
+			"LoggerType", "logger.py");
+
+		PyList trace = new PyList();
+		try {
+			trace = logger.run_script(s);
+		} catch (OutOfMemoryError e) {
+			Log.log(e);
+			errs.add(new ErrorMessage(12, null));
+			return false;
+		} catch (StackOverflowError e) {
+			Log.log(e);
+			errs.add(new ErrorMessage(13, null));
+			return false;
+		} catch (Exception e) {
+			Log.log(e);
+			errs.add(new ErrorMessage(14, null));
+			return false;
+		}
+		
+		Log.log(trace);
 		int lineNumber;
 		for (Iterator<PyList> i = trace.iterator(); i.hasNext(); ) {
 			PyList list = (PyList) i.next();
@@ -426,10 +457,10 @@ public class CodeGenerator {
 			// - array starts from 0
 			// - two for the imports
 			if (lineNumber - 3 >= script.size()) {
-			    System.out.println("This should not happen. Out of index\n");
-			    continue;
+				Log.log("This should not happen. Out of index\n");
+				continue;
 			} else if (lineNumber - 3 < 0)
-			    continue;
+				continue;
 
 			BlockTrace t = new BlockTrace();
 			t.setBlock(script.get(lineNumber - 3).v);
@@ -439,50 +470,58 @@ public class CodeGenerator {
 			PyTuple var;
 
 			for (PyObject item : dict.iteritems().asIterable()) {
-			    var = (PyTuple) item;
-			    if (var.get(1) == null)
-				    t.addVariable(var.get(0).toString(), "None");
-			    else
-				    t.addVariable(var.get(0).toString(), var.get(1).toString());
+				var = (PyTuple) item;
+				if (var.get(1) == null)
+					t.addVariable(var.get(0).toString(), "None");
+				else if (var.get(1).equals("__error_max_line__"))
+					t.addVariable("Алдаа: ", "Хамгийн их хийж болох үйлдлийн хязгаар хүрлээ. Боломжит төгсгөлгүй давталтаас сэргийлэхийн тулд энд зогсож байна.");
+				else
+					t.addVariable(var.get(0).toString(), var.get(1).toString());
 			}
 
 			traces.add(t);
 		}
 
-		for (int i = 0; i < traces.size(); i++) {
-		    System.out.println(i + ":");
-		    switch (traces.get(i).getBlock().TYPE) {
-		    case BEGIN:
-		    	System.out.println("begin");
-		    	break;
-		    case IF:
-		     	System.out.println("if");
-		     	break;
-		    case INIT:
-		     	System.out.println("init");
-		     	break;
-		    case VALUE:
-		     	System.out.println("value");
-		     	break;
-		    case INPUT:
-		     	System.out.println("input");
-		     	break;
-		    case OUTPUT:
-		     	System.out.println("OUTPUT");
-		     	break;
-		    case END:
-		     	System.out.println("end");
-		     	break;
-		    }
-		    for (Object k : traces.get(i).getVariables().keySet())
-			System.out.println(k.toString() + ": " + traces.get(i).getVariables().get(k).toString());
+		if (Log.ENABLELOGGING) {
+			for (int i = 0; i < traces.size(); i++) {
+				Log.log(i + ":");
+				switch (traces.get(i).getBlock().TYPE) {
+				case BEGIN:
+					Log.log("begin");
+					break;
+				case IF:
+					Log.log("if");
+					break;
+				case INIT:
+					Log.log("init");
+					break;
+				case VALUE:
+					Log.log("value");
+					break;
+				case INPUT:
+					Log.log("input");
+					break;
+				case OUTPUT:
+					Log.log("OUTPUT");
+					break;
+				case END:
+					Log.log("end");
+					break;
+				}
+				for (Object k : traces.get(i).getVariables().keySet())
+					Log.log(k.toString() + ": " + traces.get(i).getVariables().get(k).toString());
+			}
 		}
+
+
+		return true;
 	}
 
 
 
 	public CodeGenerator() {
 		script = new ArrayList<LineCode>();
+		errs = new ArrayList<ErrorMessage>();
 		traces = new ArrayList<BlockTrace>();
 	}
 
@@ -509,17 +548,16 @@ public class CodeGenerator {
 			s += line.code + "\n"; 
 		}
 
-		System.out.println(s);
-		runPythonScript(s);
-		return true;
+		Log.log(s);
+		return runPythonScript(s);
 	}
 
 	public ArrayList<BlockTrace> getOutput() {
 		return traces;
 	}
 
-	public String getError() {
-		return err;
+	public ArrayList<ErrorMessage> getErrors() {
+		return errs;
 	}
 
 }

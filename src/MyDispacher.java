@@ -28,7 +28,7 @@ public  class MyDispacher implements KeyEventDispatcher {
     		
     	}
 		if (DrawableBlock.CurrentNote != null && e.getID() == KeyEvent.KEY_FIRST) {
-			System.out.println("++++++");
+			Log.log("++++++");
 			String tempText = DrawableBlock.CurrentNote.getText();
 			switch ((int) e.getKeyChar()) {
 			case KeyEvent.VK_ENTER:

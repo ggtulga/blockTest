@@ -123,7 +123,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		if(!(TYPE.equals(BLOCKTYPE.BEGIN)||TYPE.equals(BLOCKTYPE.END))){
 			popupMenu.add(menuEdit);
 		
-			System.out.println(TYPE);
+			Log.log(TYPE);
 		}
 		if(TYPE!=BLOCKTYPE.BEGIN)
 			popupMenu.add(menuDelete);
@@ -166,7 +166,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		g.setFont(getFont());
 		if(this.equals(CurrentNote))
 		{
-			setColor(Color.CYAN);
+			setColor(Color.GREEN);
 		}
 		draw(g);
 	}
@@ -317,9 +317,9 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	
 	public void addToList(List<DrawableBlock> list){
 		list.add(this);
-		System.out.println("in");
-		if(getNext()!=null && !list.contains(getNext())){
-			System.out.println("inn");
+		Log.log("in");
+		if (getNext()!=null && !list.contains(getNext())){
+			Log.log("inn");
 			getNext().addToList(list);
 		}
 	}

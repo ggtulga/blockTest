@@ -18,7 +18,7 @@ public class ErrorCheck {
 		
 		varname = varname.trim(); 
 
-		if (varname == "")
+		if (varname.equals(""))
 			return true;
 
 		if (isDeclared == true) {
@@ -36,7 +36,7 @@ public class ErrorCheck {
 		}
 
 		// validate variable name.
-		if (varname.matches("^[A-Za-z][A-Za-z0-9\\[\\]]*") == false) {
+		if (varname.matches("^[A-Za-z_][A-Za-z0-9_\\[\\]]*") == false) {
 			errs.add(new ErrorMessage(1, current));
 			ret = false;
 		}
@@ -107,7 +107,7 @@ public class ErrorCheck {
 		
 		visited.add(v);
 
-		if (cont == "") {
+		if (cont.equals("")) {
 			errs.add(new ErrorMessage(6, current));
 			ret = true;
 		}
@@ -130,9 +130,9 @@ public class ErrorCheck {
 				isValid = checkVarname(varname, false);
 
 				// 	check if it's an array
-				if (varname.matches("\\p{Alnum}+\\[\\p{Alnum}*\\]") == true) {
+				if (varname.matches("[\\p{Alnum}_]+([\\[\\p{Alnum}_]+\\])+") == true) {
 					// if it is an array check for the size.				
-					if (varname.matches("\\p{Alnum}+\\[\\d+\\]") == false) {
+					if (varname.matches("[\\p{Alnum}_]+(\\[\\d+\\])+") == false) {
 						errs.add(new ErrorMessage(7, current));
 						isValid = false;
 					}

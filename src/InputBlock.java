@@ -6,7 +6,7 @@ import java.awt.KeyEventDispatcher;
 
 
 public class InputBlock  extends DrawableBlock{
-	private DrawableBlock before,next;
+
 	public InputBlock (){
 		super(BLOCKTYPE.INPUT);
 		setText("");
@@ -18,7 +18,7 @@ public class InputBlock  extends DrawableBlock{
 	@Override
 	public void draw(Graphics g) {
 			
-			g.setColor(Color.white);
+		g.setColor(Color.white);
 		int x[]={10,getWidth()-1,getWidth()-10,0};
 		int y[]={10,10,getHeight()-10,getHeight()-10};
 		g.fillPolygon(x, y, 4);

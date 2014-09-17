@@ -5,7 +5,7 @@ import java.awt.KeyEventDispatcher;
 
 
 public class ValueBlock extends DrawableBlock{
-	private DrawableBlock before,next;
+
 	public ValueBlock(){
 		super(BLOCKTYPE.VALUE);
 		setText("");
@@ -16,7 +16,7 @@ public class ValueBlock extends DrawableBlock{
 	}
 	@Override
 	public void draw(Graphics g) {
-			g.setColor(Color.white);
+		g.setColor(Color.white);
 		g.fillRect(0, 10, getWidth()-1, getHeight()-20);
 		g.setColor(getColor());
 		g.drawRect(0, 10, getWidth()-1, getHeight()-20);
