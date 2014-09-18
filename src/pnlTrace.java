@@ -57,16 +57,17 @@ public class pnlTrace extends JPanel implements ChangeListener{
 		JPanel pnl2=new JPanel(new GridLayout());
 		JPanel pnlCont=new JPanel(new GridLayout(1,2));
 		TitledBorder title = BorderFactory.createTitledBorder(
-				BorderFactory.createLoweredBevelBorder(), "Хувьсагчийн утгууд:");
+			BorderFactory.createLoweredBevelBorder(), "Хувьсагчийн утгууд:");
 		title.setTitlePosition(TitledBorder.CENTER);
 		pnl1.setBorder(title);
 		title = BorderFactory.createTitledBorder(
-				BorderFactory.createLoweredBevelBorder(), "Стандарт гаралт:");
+			BorderFactory.createLoweredBevelBorder(), "Стандарт гаралт:");
 		title.setTitlePosition(TitledBorder.CENTER);
 		pnl2.setBorder(title);
 
 		pnl1.add(new JScrollPane(lMemoryDump));
 		pnl2.add(new JScrollPane(taStdOutput));
+		
 		pnlCont.add(pnl1);
 		pnlCont.add(pnl2);
 		pnl1.setBackground(Color.white);
