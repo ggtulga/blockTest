@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.OutputStream;
 import java.io.DataOutputStream;
 
@@ -19,50 +20,6 @@ import org.python.core.PyTuple;
  */
 
 public class CodeGenerator {
-
-	/** 
-	 *  class to represent nodes in a graph
-	 *  
-	 * @author ggt
-	 *
-	 */
-	private class Node {
-		public int loop, endIf;
-		public boolean endLoop, isEndLoop;
-		public DrawableBlock b;
-		/**
-		 * Used for finding whether "if" block breaks a loop
-		 */
-		public boolean isIfEnded; 
-		/**
-		 * start and end time of visit in dfs
-		 */
-		public int sTime, eTime;
-		/**
-		 * when generating python script, this denotes whether we have
-		 * visited this node already.
-		 */
-		public boolean visited;
-		/**
-		 * parent node
-		 */
-		public Node parent;
-		/**
-		 * line number to add codes in the else statement when 
-		 * this node is "if" block. 
-		 */
-		public int lineElse;
-
-		Node(DrawableBlock b, Node p) {
-			loop = endIf = 0;
-			isIfEnded = isEndLoop = false;
-			parent = p;
-			this.b = b;
-			sTime = eTime = -1;
-			visited = false;
-		}
-	}
-
 	/**
 	 *  class to represent one line of code
 	 * @author ggt
@@ -73,32 +30,19 @@ public class CodeGenerator {
 		/**
 		 * tabs before code which is very important for python
 		 */
-		public int tabs;
+		public int tab;
 		public DrawableBlock v;
 
-		public LineCode() { code = ""; tabs = 0; v = null; }
+		public LineCode() { code = ""; tab = 0; v = null; }
 		public LineCode(LineCode l) {
 			this.v = l.v;
 			this.code = l.code;
-			this.tabs = l.tabs;
+			this.tab = l.tab;
 		}
 	}
 	
-	/**
-	 * used for dfs
-	 */
-	int time;
 	ArrayList <LineCode> script;
 	JythonFactory jf;
-	Node src;
-	/**
-	 * line number to add one line of code to the script list
-	 */
-	int lineNumber;
-	/**
-	 * stores stdout of the program.
-	 */
-	String output;
 	/**
 	 * stores errors encountered to process blocks.
 	 */
@@ -106,138 +50,112 @@ public class CodeGenerator {
 
 	// Each element of which describes a trace;
 	ArrayList<BlockTrace> traces;
-
-    
-	private void findLoopBreak(Node p, Node pre) {
-
-		while (p != null) {
-			if (p.b.TYPE == BLOCKTYPE.IF && p.isEndLoop == false) {
-				break;
-			}
-			pre = p;
-			p = p.parent;
-		}
-
-		if (p == null) {
-			// this shouldn't happen
-			Log.log("Wrong end loop detection\n");
-		} else {
-			// p is a "if" block to break out of the loop
-			p.isEndLoop = true;
-			IfBlock b = (IfBlock) p.b;
-			if (b.getNextTrue() == pre.b)
-				p.endLoop = false;
-			else
-				p.endLoop = true;
-		}
+	// keep the number
+	int bNumber;
+	// function to generate block names
+	private String generateBlockName() {
+		bNumber++;
+		return "__block_" + bNumber + "__";
 	}
 
-	/**
-	 * Visits every node to detect loops, end loops, and end if blocks.
-	 * @param g stores visited node
-	 * @param v node to visit
-	 * @param parent a parent node
-	 */
-	private void visit(Map <DrawableBlock, Node> g, DrawableBlock v, Node parent, Node innerIf) {
+	HashMap<DrawableBlock, String> block2name;
+
+	String currentName;
+	int startLine;
+	
+	private void processBlock(DrawableBlock v, String globals) {
+
 		if (v == null)
 			return;
-
-		time++;
-		Node node = g.get(v);
-		if (node == null) {
-			// we haven't visited this block so far
-			// let's insert it so that we know that we have visited this node.
-			node = new Node(v, parent);
-			node.sTime = time;
-			g.put(v, node);
-
-			// "if" block is always handled differently
-			if (v.TYPE == BLOCKTYPE.IF) {
-				IfBlock b = (IfBlock) v;
-
-				visit(g, b.getNextTrue(), node, node);
-				visit(g, b.getNextFalse(), node, node);
-
-				if (node.isIfEnded && node.isEndLoop) {
-					/*
-					 * This "if" block is closed within the loop.
-					 * Therefore, it won't break the loop. Let's find next loop breaker
-					 */
-					node.isEndLoop = false;
-					findLoopBreak(node.parent, node);
-				}
-			} else
-				visit(g, v.getNext(), node, innerIf);
-
-			time++;
-			node.eTime = time;
-		} else {
-
-			if (node.eTime > 0) {
-				// "if" block ends here
-				node.endIf++;
-				innerIf.isIfEnded = true;
-			} else {
-				// Yes, it's a loop
-				node.loop++;
-				// find the loop breaker.
-				findLoopBreak(parent, node);
-			}
-			return;
-		}
-	}
-
-	private void generatePythonScript(Map <DrawableBlock, Node> g, DrawableBlock v, int tabs, Node innerIf) {
-		if (v == null)
-			return;
-
-		Node node = g.get(v);
+		
+		block2name.put(v, currentName);
+		
+		int i;
+		DrawableBlock next;
+		
+		// declare function name
 		LineCode line = new LineCode();
-		line.tabs = tabs;
+		line.tab = 0;
+		line.code = "def " + currentName + "():";
 		line.v = v;
-		int newTabs = tabs, loop = node.loop;
+		script.add(new LineCode(line));
 
-		if (node.visited)
-			return;
+		line.tab = 1;
 
-		node.visited = true;
-
-		// check whether this node is the starting of the loop
-		while (loop > 0) {
-			// make it loop
-			line.tabs = newTabs;
-			if (node.b.TYPE == BLOCKTYPE.IF && node.isEndLoop) 
-				line.code = "while (" + node.b.getText() + "):";
-			else 
-				line.code = "while (True):";
-
-			script.add(lineNumber, new LineCode(line));
-			lineNumber++;
-			newTabs++;
-			loop--;
+		// declare globals to be used in the function
+		if (globals.equals("global") == false) {
+			line.code = new String(globals);
+			script.add(new LineCode(line));
 		}
 
-		// check whether this node is the end of "if" block
-		if (node.endIf > 0) {
-			// save the current lineNumber for else statement
-			innerIf.lineElse = lineNumber;
-			newTabs--;
-		}
+		String cont = v.getText().trim();
+		
+		switch (v.TYPE) {
+		case BEGIN:
+			
+			break;
+		case IF:
+			IfBlock b = (IfBlock) v;
 
-		// tabs might have changed
-		line.tabs = newTabs;
+			line.code = "if " + cont + ":";
+			script.add(new LineCode(line));
 
-		if (v.TYPE == BLOCKTYPE.INIT) {
+			boolean callTrue = true;
+			boolean callFalse = true;
+			String trueName = "", falseName = "";
+			// if the statement is true
+			next = b.getNextTrue();
+			line.tab = 2;
+			if (block2name.containsKey(next)) {// check if we have visited there before
+				line.code = block2name.get(next) + "()";
+				script.add(new LineCode(line));
+				callTrue = false;
+			} else {
+				trueName = generateBlockName();
+				line.code = trueName + "()";
+				script.add(new LineCode(line));
+			}
+			// else
+			line.tab = 1;
+			line.code = "else:";
+			script.add(new LineCode(line));
+			
+			// if the statement is false
+			next = b.getNextFalse();
+			line.tab = 2;
+			if (block2name.containsKey(next)) {// check if we have visited there before
+				line.code = block2name.get(next) + "()";
+				script.add(new LineCode(line));
+				callFalse = false;
+			} else {
+				falseName = generateBlockName();
+				line.code = falseName + "()";
+				script.add(new LineCode(line));
+			}
+			line.tab = 1;
+
+			if (callTrue) {
+				currentName = trueName;
+				processBlock(b.getNextTrue(), globals);
+			}
+
+			if (callFalse) {
+				currentName = falseName;
+				processBlock(b.getNextFalse(), globals);
+			}
+			
+			break;
+		case INIT:
 			// Let's do a nice thing by separating declarations by commas
 			int s = 0, f = 0, x, y;
-			String c = v.getText(), tmp = "";
+			String tmp = "";
 			HashMap<String, String> vars = new HashMap<String, String>();
 			while (true) {
-				f = c.indexOf(',', f);
+				f = cont.indexOf(',', f);
 				if (f == -1)
-					f = c.length();
+					f = cont.length();
 
-				tmp = c.substring(s, f).trim();
+				tmp = cont.substring(s, f).trim();
 				
 				x = tmp.indexOf('[');
 				if (x != -1) {
@@ -254,7 +172,7 @@ public class CodeGenerator {
 					}
 
 					val = "None";
-					for (int i = sizes.size() - 1; i >= 0; i--)
+					for (i = sizes.size() - 1; i >= 0; i--)
 						val = '[' + val + " for __init_array__ in range(" + sizes.get(i) + ")]";
 						
 					vars.put(arrayName, val);
@@ -262,167 +180,92 @@ public class CodeGenerator {
 					vars.put(tmp, "None");
 				}
 
-				if (f == c.length())
+				if (f == cont.length())
 					break; // this is the end of this list of declarations;
 
 				f++;
 				s = f; // new start
 			}
 
-			String rvalue = "=";
-			Iterator i = vars.entrySet().iterator();
+			String rvalue = "", lvalue = "";
+			Iterator it = vars.entrySet().iterator();
 			Map.Entry<String, String> pair;
 			while (true) {
-				pair = (Map.Entry<String, String>) i.next();
-				line.code += pair.getKey();
+				pair = (Map.Entry<String, String>) it.next();
+				lvalue += pair.getKey();
 				rvalue += pair.getValue();
-				if (i.hasNext()) {
-					line.code += ",";
+				if (it.hasNext()) {
+					lvalue += ",";
 					rvalue += ",";
 				} else
 					break;
 			}
-			line.code += rvalue;
 
-		} else 	if (v.TYPE == BLOCKTYPE.OUTPUT) {
-			line.code = "print(" + v.getText() + ")";
-		} else if (v.TYPE == BLOCKTYPE.IF) {
-			IfBlock b = (IfBlock) node.b;
+			// declare variables as globals
+			line.code = "global " + lvalue;
+			script.add(new LineCode(line));
+			
+			line.code = lvalue + "=" + rvalue;
+			script.add(new LineCode(line));
 
-			if (node.isEndLoop == true) { // loop must break here.
-				// check whether the loop will break when the condition is true or false
-				if (node.endLoop == true) {
+			if (globals.equals("global"))
+				globals += " " + lvalue;
+			else
+				globals += "," + lvalue;
 
-					if (node.loop == 0) {
-						// It shouldn't be a start of the loop too
-						// If it's a start of the loop then while is used.
-						line.code = "if (" + node.b.getText() + "): break";
-						script.add(lineNumber, new LineCode(line));
-						lineNumber++;
-					}
+			break;
+		case VALUE:
+			line.code = cont;
+			script.add(new LineCode(line));
+			
+			break;
+		case INPUT:
+		case OUTPUT:
+			String[] var = cont.split(",");
+			String substr;
 
-					generatePythonScript(g, b.getNextFalse(), newTabs, innerIf);
+			for (i = 0; i < var.length; i++) {
 
-					// getting out of the loop
-					newTabs--;
-					// All the codes inside the loop are generated so we must start from
-					// the end.
-					lineNumber = script.size();
-					generatePythonScript(g, b.getNextTrue(), newTabs, innerIf);
-				} else {
-					if (node.loop == 0) {
-						// It shouldn't be a start of the loop too
-						// If it's a start of the loop then while is used.
-						line.code = "if (not (" + node.b.getText() + ")): break";
-						script.add(lineNumber, new LineCode(line));
-						lineNumber++;
-					}
+				if (v.TYPE == BLOCKTYPE.INPUT)
+					line.code = var[i] + "=int(JOptionPane.showInputDialog('" + var[i] + "'))";
+				else
+					line.code = "print(" + var[i] + ")";
 
-					generatePythonScript(g, b.getNextTrue(), newTabs, innerIf);
-
-					// getting out of the loop
-					newTabs--;
-					lineNumber = script.size();
-					// All the codes inside the loop are generated so we must start from
-					// the end.
-					generatePythonScript(g, b.getNextFalse(), newTabs, innerIf);
-				}
-			} else if (node.loop == 0) { // not a loop	but it's a "if" block	
-				line.code = "if (" + v.getText() + "):";
-				script.add(lineNumber, new LineCode(line));
-				lineNumber++;
-
-				newTabs++;
-
-				// If there is no blocks when the condition is true.
-				if (g.get(b.getNextTrue()).endIf > 0) {
-					line.code = "pass";
-					line.tabs++;
-					script.add(lineNumber, new LineCode(line));
-					lineNumber++;
-					// this line number becomes the location to place
-					// codes in the else statement
-					node.lineElse = lineNumber;
-					line.tabs--;
-				} else 
-					generatePythonScript(g, b.getNextTrue(), newTabs, node);
-
-
-				// there should be no need to restore lineNumber
-				// Because, in any way whether the recursion is returning or
-				// we're going forward, lineNumber is correct.
-				lineNumber = node.lineElse;
-				line.code = "else:";
-				script.add(lineNumber, new LineCode(line));
-				lineNumber++;
-
-				if (g.get(b.getNextFalse()).endIf > 0) {
-					// If there is no blocks when the condition is false.
-					line.tabs++;
-					line.code = "pass";
-					script.add(lineNumber, new LineCode(line));
-					lineNumber++;
-				} else 					
-					generatePythonScript(g, b.getNextFalse(), newTabs, innerIf);
-
-				if (innerIf != null) {
-					innerIf.lineElse = lineNumber; 
-				}
+				script.add(new LineCode(line));
 			}
 
-			// BLOCKTYPE.IF is complicated 
-			// so it's self contained.
-			// and it returns here.
-			return;
-
-		} else if (v.TYPE == BLOCKTYPE.END) {
+			break;
+		case END:
 			line.code = "sys.exit(0)";
-			script.add(lineNumber, new LineCode(line));
-			lineNumber++;
-			return; // there's no need to go further
-		} else if (v.TYPE == BLOCKTYPE.VALUE)
-			line.code = v.getText();
-		else if (v.TYPE == BLOCKTYPE.INPUT) {
-			int s = 0, f;
-			String tmp = v.getText(), substr;
-			while (true) {
-				f = tmp.indexOf(',', s);
-				if (f == -1)
-					f = tmp.length();
+			script.add(new LineCode(line));
+			break;
+		}
 
-				substr = tmp.substring(s, f).trim();
-				line.code = substr + " = int(JOptionPane.showInputDialog('" + substr + "'))";
-				script.add(lineNumber, new LineCode(line));
-				lineNumber++;
-
-				Log.log(substr);
-				if (f == tmp.length())
-					break;
-
-				s = f + 1;
+		next = v.getNext();
+		
+		if (v.TYPE != BLOCKTYPE.IF && v.TYPE != BLOCKTYPE.END) {
+			if (block2name.containsKey(next)) {
+				line.code = block2name.get(next) + "()";
+				script.add(new LineCode(line));
+			} else {
+				currentName = generateBlockName();
+				line.code = currentName + "()";
+				script.add(new LineCode(line));
+				processBlock(next, globals);
 			}
+		}
 
-			generatePythonScript(g, v.getNext(), newTabs, innerIf);
-			return;
-
-		} else if (v.TYPE == BLOCKTYPE.BEGIN)
-			line.code = "pass";
-
-		script.add(lineNumber, new LineCode(line));
-		lineNumber++;
-		generatePythonScript(g, v.getNext(), newTabs, innerIf);
 	}
-
+		
 	/**
 	 * initializes locals to generate new script
 	 */
 	private void init() {
-		time = 0;
-		lineNumber = 0;
+		bNumber = 0;
 		script.clear();
-		output = "";
 		errs.clear();
 		traces.clear();
+		block2name.clear();
 	}
 
 	private boolean runPythonScript(String s) {
@@ -451,37 +294,53 @@ public class CodeGenerator {
 
 		Log.log(trace);
 		int lineNumber;
+		boolean isEnded, isStarted;
+		isEnded = isStarted = false;
+		DrawableBlock v, pre = null;
 		for (Iterator<PyList> i = trace.iterator(); i.hasNext(); ) {
 			PyList list = (PyList) i.next();
 			lineNumber = Integer.parseInt(list.get(0).toString());
-
+			lineNumber--;
 			// Need to substract 2:	
 			// - array starts from 0
 			// - two for the imports
-			if (lineNumber - 3 >= script.size()) {
+			if (lineNumber >= script.size() || lineNumber < 0) {
 				Log.log("This should not happen. Out of index\n");
 				continue;
-			} else if (lineNumber - 3 < 0)
-				continue;
-
-			BlockTrace t = new BlockTrace();
-			t.setBlock(script.get(lineNumber - 3).v);
-
-			
-			PyDictionary dict = (PyDictionary) list.get(1);
-			PyTuple var;
-
-			for (PyObject item : dict.iteritems().asIterable()) {
-				var = (PyTuple) item;
-				if (var.get(1) == null)
-					t.addVariable(var.get(0).toString(), "None");
-				else if (var.get(1).equals("__error_max_line__"))
-					t.addVariable("Алдаа: ", "Хамгийн их хийж болох үйлдлийн хязгаар хүрлээ. Боломжит төгсгөлгүй давталтаас сэргийлэхийн тулд энд зогсож байна.");
-				else
-					t.addVariable(var.get(0).toString(), var.get(1).toString());
 			}
 
-			traces.add(t);
+			if (lineNumber == startLine)
+				isStarted = true;
+
+			if (isStarted == false || isEnded == true)
+				continue;
+
+			v = script.get(lineNumber).v;
+			
+			if (v != null && pre != v) {
+				pre = v;
+
+				if (v.TYPE == BLOCKTYPE.END)
+					isEnded = true;
+				
+				BlockTrace t = new BlockTrace();
+				t.setBlock(v);
+			
+				PyDictionary dict = (PyDictionary) list.get(1);
+				PyTuple var;
+
+				for (PyObject item : dict.iteritems().asIterable()) {
+					var = (PyTuple) item;
+					if (var.get(1) == null)
+						t.addVariable(var.get(0).toString(), "None");
+					else if (var.get(1).equals("__error_max_line__"))
+						t.addVariable("Алдаа: ", "Хамгийн их хийж болох үйлдлийн хязгаар хүрлээ. Боломжит төгсгөлгүй давталтаас сэргийлэхийн тулд энд зогсож байна.");
+					else
+						t.addVariable(var.get(0).toString(), var.get(1).toString());
+				}
+
+				traces.add(t);
+			}
 		}
 
 		if (Log.ENABLELOGGING) {
@@ -525,6 +384,7 @@ public class CodeGenerator {
 		script = new ArrayList<LineCode>();
 		errs = new ArrayList<ErrorMessage>();
 		traces = new ArrayList<BlockTrace>();
+		block2name = new HashMap<DrawableBlock, String>();
 	}
 
 	/**
@@ -533,21 +393,28 @@ public class CodeGenerator {
 	 */
 	public boolean generateCode(DrawableBlock start) {
 		init();
+		
+		LineCode line = new LineCode();
+		String startFunction = currentName = generateBlockName();
 
-		Map <DrawableBlock, Node> g = new HashMap <DrawableBlock, Node>();
+		String s = "";
+		
+		line.code = "import sys";
+		script.add(new LineCode(line));
+		line.code = "from javax.swing import JOptionPane";
+		script.add(new LineCode(line));
+		
+		processBlock(start, "global");
 
-		time = 0;
-		visit(g, start, null, null);
+		startLine = script.size();
+		line.code = startFunction + "()";
+		script.add(new LineCode(line));
 
-		// Now ready to generate python script
-		generatePythonScript(g, start, 0, null);
-
-		String s = "import sys\nfrom javax.swing import JOptionPane\n";
-		for (LineCode line:script) {
-			for (int i = 0; i < line.tabs; i++)
+		for (LineCode codeLine : script) {
+			for (int i = 0; i < codeLine.tab; i++)
 				s += "\t";
 
-			s += line.code + "\n"; 
+			s += codeLine.code + "\n"; 
 		}
 
 		Log.log(s);

@@ -44,7 +44,7 @@ public class test extends JFrame {
 	testPanel mainPanel;
 	JList<String> inputList;
 	Map<String,String> inputs;
-	JPanel inputPanel;
+ 	JPanel inputPanel;
 	DefaultListModel<String> inputModel;
 	JTextArea taResult;
 	String currentVariable="";

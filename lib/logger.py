@@ -1,6 +1,5 @@
 
 import LoggerType
-
 import sys
 sys.path.append('./lib/')
 import traceback
@@ -11,6 +10,8 @@ import copy
 
 DEBUG = True
 MAX_LINES = 300
+	
+IGNORE_VARS = set(('__init_array__', '__builtins__', 'sys', 'JOptionPane'))
 
 class Logger(bdb.Bdb, LoggerType):
 
@@ -26,6 +27,8 @@ class Logger(bdb.Bdb, LoggerType):
     def run_script(self, script):
         user_stdout = cStringIO.StringIO()
 
+        old_stdout = sys.stdout
+        
         sys.stdout = user_stdout
 
         user_globals = {
@@ -36,7 +39,8 @@ class Logger(bdb.Bdb, LoggerType):
             self.run(script, user_globals, user_globals)
         except SystemExit:
             pass
-            
+
+        # sys.stdout = old_stdout
         return self.trace
         
         # for i in self.trace:
@@ -57,12 +61,12 @@ class Logger(bdb.Bdb, LoggerType):
             raise bdb.BdbQuit
         
         for i, v in frame.f_globals.items():
-            if i == '__builtins__' or i == 'sys' or i == 'JOptionPane':
-                continue
+	    if i in IGNORE_VARS:
+		continue
 
             if i == '__user_stdout__':
                 self.globals[i] = v.getvalue()
-            elif i == '__init_array__':
+            elif '__block_' in i:
                 continue    # exclude __init_array__ variable used for internal
             else:
                 self.globals[i] = copy.copy(v);
@@ -70,8 +74,9 @@ class Logger(bdb.Bdb, LoggerType):
         self.trace.append([self.lineno, dict.copy(self.globals)])
         
             
-# file = open('test/for_loop.py', 'r')
+# file = open('tests/euclid.py', 'r')
 # data = file.read()
 
 # logger = Logger()
-# logger._run_script(data)
+# print logger.run_script(data)
+
