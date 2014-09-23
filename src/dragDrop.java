@@ -25,7 +25,7 @@ public class dragDrop implements MouseMotionListener,MouseListener,Serializable 
 	@Override
 	public void mouseClicked(MouseEvent e) {		
 		DrawableBlock temp=(DrawableBlock)e.getSource();
-		DrawableBlock.CurrentNote=null;
+		DrawableBlock.setCurrentBlock(null, null);
 		DrawableBlock.setSelectedBlock(temp, Color.orange);
 		if(DrawableBlock.firstBLock==null){
 			if(temp.TYPE!=BLOCKTYPE.END){
@@ -34,7 +34,10 @@ public class dragDrop implements MouseMotionListener,MouseListener,Serializable 
 			}
 		}else if(temp.TYPE==BLOCKTYPE.BEGIN||DrawableBlock.firstBLock.equals(temp)){
 			if(DrawableBlock.firstBLock.equals(temp)&&!temp.TYPE.equals(BLOCKTYPE.BEGIN)&&!temp.TYPE.equals(BLOCKTYPE.END))
-				DrawableBlock.CurrentNote=temp;
+				//DrawableBlock.CurrentNote=temp;
+				DrawableBlock.setSelectedBlock(null, null);
+			DrawableBlock.setCurrentBlock(temp, Color.green);
+			System.out.println("greeen");
 			DrawableBlock.firstBLock.setColor(DrawableBlock.firstBLock.getBeforeColor());
 			DrawableBlock.firstBLock=null;
 		}else{
@@ -75,32 +78,31 @@ public class dragDrop implements MouseMotionListener,MouseListener,Serializable 
 	public void mouseEntered(MouseEvent e) {
 
 		DrawableBlock block=(DrawableBlock)e.getSource();
-		if(DrawableBlock.firstBLock!=null&&DrawableBlock.firstBLock.equals(block));
-		else{
-			block.setColor(Color.blue);
-		}
+		if(!(DrawableBlock.firstBLock!=null&&DrawableBlock.firstBLock.equals(block)))
+			if(!(DrawableBlock.CurrentNote!=null&&DrawableBlock.CurrentNote.equals(block)))
+				if(!(DrawableBlock.SelectedBlock!=null&&DrawableBlock.SelectedBlock.equals(block)))
+					block.setColor(Color.blue);
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
 
 		DrawableBlock block=(DrawableBlock)e.getSource();
-		if(DrawableBlock.firstBLock!=null&&DrawableBlock.firstBLock.equals(block));
-		else
-			if(DrawableBlock.CurrentNote!=null&&DrawableBlock.CurrentNote.equals(block));
-			else
-				block.setColor(Color.black);
+		if(!(DrawableBlock.firstBLock!=null&&DrawableBlock.firstBLock.equals(block)))
+			if(!(DrawableBlock.CurrentNote!=null&&DrawableBlock.CurrentNote.equals(block)))
+				if(!(DrawableBlock.SelectedBlock!=null&&DrawableBlock.SelectedBlock.equals(block)))
+					block.setColor(Color.black);
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
 		DrawableBlock tempNote=(DrawableBlock) e.getSource();
-		tempNote.setState(1);
+		tempNote.setTemp(null);
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		DrawableBlock tempNote=(DrawableBlock) e.getSource();
-		tempNote.setState(0);
+		tempNote.setTemp(null);
 	}		
 }

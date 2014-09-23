@@ -1,8 +1,10 @@
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -69,6 +71,7 @@ public class testPanel extends JPanel implements MouseMotionListener,
 	public void newPanel(){
 		this.removeAll();
 		startBlock = new StartBlock(1);
+		startBlock.setLocation(50, 50);
 		add(startBlock);
 		repaint();
 	}
@@ -190,11 +193,88 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		}
 		if (selectedRec != null) {
 			g.setColor(Color.yellow);
-			g.drawRect(selectedRec.x, selectedRec.y, selectedRec.width,
+			 Graphics2D g2 = (Graphics2D) g;
+			 g2.setStroke(new BasicStroke(5));
+			g2.drawRect(selectedRec.x, selectedRec.y, selectedRec.width,
 				   selectedRec.height);
 		}
 	}
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		cursorPoint = e.getPoint();
 
+	}
+	@Override
+	public void mousePressed(MouseEvent e) {
+		if(selectedRec!=null){
+			dragStartPoint = cursorPoint;
+			for (DrawableBlock block : selectedBlocks) {
+				block.setTemp(e.getLocationOnScreen());
+			}			
+		}
+	}
+	
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		if (dragStartPoint != null && selectedRec==null) {
+			selectedRec = new Rectangle(dragStartPoint.x, dragStartPoint.y,
+						    cursorPoint.x - dragStartPoint.x, cursorPoint.y
+						    - dragStartPoint.y);
+			selectBlocks();
+		}else {
+			
+		}
+
+	}		
+	
+	@Override
+	public void mouseEntered(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+	}
+	
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if(DrawableBlock.getSelectedBlock()!=null)
+			DrawableBlock.setSelectedBlock(null, null);
+		if(DrawableBlock.CurrentNote!=null){
+			DrawableBlock.CurrentNote.setFont(new Font(Font.MONOSPACED, Font.ITALIC
+								   | Font.BOLD, 14));
+			DrawableBlock.CurrentNote.setColor(Color.black);
+			DrawableBlock.setCurrentBlock(null, null);//CurrentNote = null;
+		}	
+		if (newBlock != null) {
+			DrawableBlock b;
+			if (newBlock.TYPE == BLOCKTYPE.END)
+				b = new EndBlock();
+			else if (newBlock.TYPE == BLOCKTYPE.INIT)
+				b = new InitBlock();
+			else if (newBlock.TYPE == BLOCKTYPE.INPUT)
+				b = new InputBlock();
+			else if (newBlock.TYPE == BLOCKTYPE.OUTPUT)
+				b = new OutputBlock();
+			else if (newBlock.TYPE == BLOCKTYPE.VALUE)
+				b = new ValueBlock();
+			else
+				b = new IfBlock();
+			addBlock(b);
+			b.setLocation(e.getPoint());
+			newBlock.setColor(Color.black);
+			newBlock = null;
+			test.setEdited();
+		} else if (DrawableBlock.firstBLock != null) {
+			DrawableBlock.firstBLock.setColor(Color.black);
+			DrawableBlock.firstBLock = null;
+		}
+
+		
+			deSelectBlocks();
+		
+	}
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		cursorPoint = e.getPoint();
@@ -246,7 +326,7 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		repaint();
 	}
 
-	public void deSelectBlocks() {
+	private void deSelectBlocks() {
 
 		for (DrawableBlock block : selectedBlocks) {
 
@@ -257,13 +337,7 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		repaint();
 		dragStartPoint = null;
 	}
-
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		cursorPoint = e.getPoint();
-
-	}
-
+	
 	public void addBlock(DrawableBlock block) {
 		add(block);
 		repaint();
@@ -275,77 +349,6 @@ public class testPanel extends JPanel implements MouseMotionListener,
 
 	public void setNewBlock(DrawableBlock newBlock) {
 		this.newBlock = newBlock;
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if(DrawableBlock.getSelectedBlock()!=null)
-			DrawableBlock.setSelectedBlock(null, null);
-		if(DrawableBlock.CurrentNote!=null){
-			DrawableBlock.CurrentNote.setFont(new Font(Font.MONOSPACED, Font.ITALIC
-								   | Font.BOLD, 14));
-			DrawableBlock.CurrentNote.setColor(Color.black);
-			DrawableBlock.CurrentNote = null;
-		}	
-		if (newBlock != null) {
-			DrawableBlock b;
-			if (newBlock.TYPE == BLOCKTYPE.END)
-				b = new EndBlock();
-			else if (newBlock.TYPE == BLOCKTYPE.INIT)
-				b = new InitBlock();
-			else if (newBlock.TYPE == BLOCKTYPE.INPUT)
-				b = new InputBlock();
-			else if (newBlock.TYPE == BLOCKTYPE.OUTPUT)
-				b = new OutputBlock();
-			else if (newBlock.TYPE == BLOCKTYPE.VALUE)
-				b = new ValueBlock();
-			else
-				b = new IfBlock();
-			addBlock(b);
-			b.setLocation(e.getPoint());
-			newBlock.setColor(Color.black);
-			newBlock = null;
-			test.setEdited();
-		} else if (DrawableBlock.firstBLock != null) {
-			DrawableBlock.firstBLock.setColor(Color.black);
-			DrawableBlock.firstBLock = null;
-		}
-
-		if (selectedBlocks.size() > 0) {
-			deSelectBlocks();
-		}
-	}
-	
-	@Override
-	public void mousePressed(MouseEvent e) {
-		if(selectedRec!=null){
-			dragStartPoint = cursorPoint;
-			for (DrawableBlock block : selectedBlocks) {
-				block.setTemp(e.getLocationOnScreen());
-			}			
-		}
-	}
-	
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		if (dragStartPoint != null && selectedRec==null) {
-			selectedRec = new Rectangle(dragStartPoint.x, dragStartPoint.y,
-						    cursorPoint.x - dragStartPoint.x, cursorPoint.y
-						    - dragStartPoint.y);
-			selectBlocks();
-		}else {
-			
-		}
-
-	}		
-	
-	@Override
-	public void mouseEntered(MouseEvent e) {
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
 	}
 	
 	public void setErrorTypeToBlock(DrawableBlock block){

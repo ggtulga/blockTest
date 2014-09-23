@@ -38,7 +38,7 @@ public class test extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private File currentFile=null;
-	private final static String TITEL="Flow chart runner";
+	private final static String TITLE = "Flow chart runner";
 	private static char FileEdited=' ';
 	private JFileChooser fileChooser;
 	testPanel mainPanel;
@@ -54,7 +54,7 @@ public class test extends JFrame {
 	private JPanel temp=new JPanel(new GridLayout());
 	@SuppressWarnings("deprecation")
 	public test() {
-		setTitle(TITEL);
+		setTitle(TITLE);
 		setLayout(new BorderLayout());
 		JPanel holderPanel = new JPanel(new BorderLayout());
 		holderPanel.add(temp, BorderLayout.NORTH);
@@ -94,9 +94,7 @@ public class test extends JFrame {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {	
-
 					newp();
-				
 				}			
 			});
 		jpMenuBar.add(btnNew);
@@ -130,8 +128,7 @@ public class test extends JFrame {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// DrawableBlock.setSelectedBlock(null, null);
-					DrawableBlock.CurrentNote = null;
+					DrawableBlock.setCurrentBlock(null, null);//CurrentNote = null;
 					checkAndRun();
 				}
 
@@ -365,6 +362,17 @@ public class test extends JFrame {
 				}
 			});
 		main_menu.add(menu_item);
+
+		menu_item = new JMenuItem("Тухай");
+		menu_item.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent arg0) {
+					pnlAbout pnl = new pnlAbout();
+					pnl.setVisible(true);
+				}
+			});
+		main_menu.add(menu_item);
+		
 		return top_menu_bar;
 	}
 	private void saveAs(){
@@ -373,7 +381,7 @@ public class test extends JFrame {
 			currentFile = fileChooser.getSelectedFile();
 			mainPanel.savePanel(currentFile);
 			repaint();
-			setTitle(TITEL+" - "+currentFile.getAbsolutePath());
+			setTitle(TITLE + " - " + currentFile.getAbsolutePath());
 			FileEdited=' ';
 				
 		} 
@@ -394,7 +402,7 @@ public class test extends JFrame {
 				mainPanel.openFile(currentFile);
 				repaint();
 				FileEdited=' ';
-				setTitle(TITEL+" - "+currentFile.getAbsolutePath());
+				setTitle(TITLE + " - " + currentFile.getAbsolutePath());
 			}
 		}
 	}
@@ -403,7 +411,7 @@ public class test extends JFrame {
 		{
 			mainPanel.newPanel();
 			currentFile=null;
-			setTitle(TITEL);
+			setTitle(TITLE);
 		}
 	}
 	 

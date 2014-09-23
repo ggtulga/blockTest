@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -36,9 +37,8 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	private Font textFont;
 	private JPopupMenu popupMenu=null;
 	private Point temp;
-	private int state = 0;
 	public BLOCKTYPE TYPE;
-	private Color color,beforeColor;
+	private Color color, beforeColor;
 	public List<DrawableBlock> getBeforeBlocks() {
 		return beforeBlocks;
 	}
@@ -114,10 +114,10 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		
 		menuEdit.setMnemonic(KeyEvent.VK_E);
 		menuEdit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,
-	            ActionEvent.CTRL_MASK));
+							       ActionEvent.CTRL_MASK));
 		menuDelete.setMnemonic(KeyEvent.VK_DELETE);
 		menuDelete.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,
-	            ActionEvent.CTRL_MASK));
+								 ActionEvent.CTRL_MASK));
 		
 		// Create a popup menu
 		if(!(TYPE.equals(BLOCKTYPE.BEGIN)||TYPE.equals(BLOCKTYPE.END))){
@@ -166,7 +166,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		g.setFont(getFont());
 		if(this.equals(CurrentNote))
 		{
-			setColor(Color.GREEN);
+			//	setColor(Color.GREEN);
 		}
 		draw(g);
 	}
@@ -194,7 +194,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		super.processMouseEvent(event);
 		if (event.isPopupTrigger()) {
 			if(popupMenu!=null)
-			popupMenu.show(event.getComponent(), event.getX(), event.getY());
+				popupMenu.show(event.getComponent(), event.getX(), event.getY());
 		}
 	}
 
@@ -202,7 +202,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	public void actionPerformed(ActionEvent e) {
 		switch (e.getActionCommand()) {
 		case "Засварлах":
-			CurrentNote = this;
+			setCurrentBlock(this, Color.green);//Note = this;
 			setFocusable(true);
 			textFont = new Font(Font.MONOSPACED, Font.ITALIC, 14);
 			firstBLock = null;
@@ -223,17 +223,11 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 
 	public Point getOutputPoint() {
 		Point p = new Point(getWidth() / 2 + getLocation().x, getHeight()
-				+ getLocation().y);
+				    + getLocation().y);
 		return p;
 	}
 
-	public int getState() {
-		return state;
-	}
-
-	public void setState(int state) {
-		this.state = state;
-	}
+	
 
 	public Color getColor() {
 		return color;
@@ -266,10 +260,10 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		beforeBlocks.remove(b);
 	}
 	public boolean isHasBefore(){
-	if (beforeBlocks.size()>0)
-		return true;
-	else
-		return false;
+		if (beforeBlocks.size()>0)
+			return true;
+		else
+			return false;
 	}
 	public Color getBeforeColor() {
 		return beforeColor;
@@ -277,6 +271,8 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	public void setBeforeColor(Color beforeColor) {
 		this.beforeColor = beforeColor;
 	}
+	
+	
 	public boolean dragBlock(Point p){		
 		Point temp=new Point(p);
 		if(getTemp()==null) setTemp(temp);
@@ -287,7 +283,8 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 			p.x=getLocation().x+p.x;
 			p.y=getLocation().y+p.y;
 			Container c=getParent();
-			if(!(p.x<0||p.y<0||(p.x+getWidth())>c.getWidth()||(p.y+getHeight())>c.getHeight())){
+			Rectangle rect=new Rectangle(p.x, p.y, getWidth(), getHeight());
+			if(c.getBounds().contains(rect)){
 				setLocation(p);
 				repaint();		
 			}else if((p.x+getWidth())>c.getWidth()||(p.y+getHeight())>c.getHeight()){
@@ -308,12 +305,12 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		return false;
 	}
 	/*public String toXMLTags(){
-		String result="<Block type='"+TYPE.getValue()+"', text='"+getText()+"', x="+getLocation().x+", y="+getLocation().y+">";
-		if(getNext()!=null)
-			result+=getNext().toXMLTags();
-		result+="</Block>";		
-		return result;
-	}*/
+	  String result="<Block type='"+TYPE.getValue()+"', text='"+getText()+"', x="+getLocation().x+", y="+getLocation().y+">";
+	  if(getNext()!=null)
+	  result+=getNext().toXMLTags();
+	  result+="</Block>";		
+	  return result;
+	  }*/
 	
 	public void addToList(List<DrawableBlock> list){
 		list.add(this);
@@ -332,10 +329,27 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 		if(SelectedBlock!=null){
 			SelectedBlock.setColor(SelectedBlock.getBeforeColor());
 		}
-			SelectedBlock = selectedBlock;
-			if(SelectedBlock!=null){
-				SelectedBlock.setColor(color);
-			}					
+		SelectedBlock = selectedBlock;
+		if(SelectedBlock!=null){
+			SelectedBlock.setColor(color);
+		}					
+	}
+	public static void setCurrentBlock(DrawableBlock selectedBlock, Color color) {
+		if(CurrentNote!=null){
+			CurrentNote.setColor(Color.black);
+			DrawableBlock.CurrentNote.setFont(new Font(Font.MONOSPACED, Font.ITALIC
+								   | Font.BOLD, 14));
+			CurrentNote.revalidate();
+			CurrentNote.repaint();
+			Log.log("cccccccccccccccc");
+		}
+		CurrentNote = selectedBlock;
+		if(CurrentNote!=null){
+			CurrentNote.setColor(color);
+			DrawableBlock.CurrentNote.setFont(new Font(Font.MONOSPACED, Font.ITALIC
+								   , 14));
+		}	
+			
 	}
 	
 	public void removeThis(){
@@ -365,9 +379,9 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 				this.getNext().removeBefore(this);
 			this.setNext(null);
 			try{
-			c.remove(this);
+				c.remove(this);
 
-			c.repaint();
+				c.repaint();
 			}catch(Exception e){};
 			firstBLock = null;
 		}

@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -57,11 +58,11 @@ public class pnlTrace extends JPanel implements ChangeListener{
 		JPanel pnl2=new JPanel(new GridLayout());
 		JPanel pnlCont=new JPanel(new GridLayout(1,2));
 		TitledBorder title = BorderFactory.createTitledBorder(
-			BorderFactory.createLoweredBevelBorder(), "Хувьсагчийн утгууд:");
+				BorderFactory.createLoweredBevelBorder(), "Хувьсагчийн утгууд:");
 		title.setTitlePosition(TitledBorder.CENTER);
 		pnl1.setBorder(title);
 		title = BorderFactory.createTitledBorder(
-			BorderFactory.createLoweredBevelBorder(), "Стандарт гаралт:");
+				BorderFactory.createLoweredBevelBorder(), "Стандарт гаралт:");
 		title.setTitlePosition(TitledBorder.CENTER);
 		pnl2.setBorder(title);
 
@@ -70,6 +71,8 @@ public class pnlTrace extends JPanel implements ChangeListener{
 		
 		pnlCont.add(pnl1);
 		pnlCont.add(pnl2);
+		pnlCont.setPreferredSize(new Dimension(1500, 150));
+		pnlCont.setMaximumSize(new Dimension(1500, 250));
 		pnl1.setBackground(Color.white);
 		pnl2.setBackground(Color.white);
 				

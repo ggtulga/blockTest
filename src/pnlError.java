@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,7 +39,7 @@ public class pnlError extends JPanel{
 			}
 		});
 		
-		JPanel temp=new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JPanel temp=new JPanel(new FlowLayout(FlowLayout.CENTER));
 		JButton btnClose=new JButton("Гарах");
 		temp.add(btnClose);
 		btnClose.addActionListener(new ActionListener() {
@@ -51,5 +52,6 @@ public class pnlError extends JPanel{
 		this.setLayout(new BorderLayout());
 		this.add(temp,BorderLayout.LINE_START);
 		this.add(new JScrollPane(lError),BorderLayout.CENTER);
+		this.setPreferredSize(new Dimension(1500, 100));
 	}
 }
