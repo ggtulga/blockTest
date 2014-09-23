@@ -9,7 +9,7 @@ import bdb
 import copy
 
 DEBUG = True
-MAX_LINES = 300
+MAX_LINES = 500
 	
 IGNORE_VARS = set(('__init_array__', '__builtins__', 'sys', 'JOptionPane'))
 
