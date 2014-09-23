@@ -7,7 +7,7 @@ This software was inspired from Python Tutor by Philip Guo .
 
 This software is distributed under GPLv3 and all other latter versions.
 
-### it works   
+### How it works   
 
 This software generates python script and executes it in the memory using jython.
 
@@ -21,6 +21,6 @@ This software generates python script and executes it in the memory using jython
 javac -cp /usr/share/java/jython.jar *.java -d ../bin/
 
 
-### Run __
+### Run
 
 java -cp /usr/share/java/jython.jav:../lib/:./ test
