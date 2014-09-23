@@ -24,3 +24,12 @@ javac -cp /usr/share/java/jython.jar *.java -d ../bin/
 ### Run
 
 java -cp /usr/share/java/jython.jav:../lib/:./ test
+
+
+### TODO
+
+* make bilingual
+* Improve graphics
+* Improve drawing algorithm
+* .....
+
