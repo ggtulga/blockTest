@@ -185,18 +185,18 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		}
 		if (DrawableBlock.firstBLock != null) {
 			g.setColor(Color.blue);
-			OutputLines line = new OutputLines(DrawableBlock.firstBLock);
+			/*OutputLines line = new OutputLines(DrawableBlock.firstBLock);
 			try{
 				line.drawLine(DrawableBlock.firstBLock.getOutputPoint(),
 					      cursorPoint, g);
-			}catch(Exception e){}
+			}catch(Exception e){}*/
 		}
 		if (selectedRec != null) {
 			g.setColor(Color.yellow);
-			 Graphics2D g2 = (Graphics2D) g;
-			 g2.setStroke(new BasicStroke(5));
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setStroke(new BasicStroke(5));
 			g2.drawRect(selectedRec.x, selectedRec.y, selectedRec.width,
-				   selectedRec.height);
+				    selectedRec.height);
 		}
 	}
 	@Override
@@ -259,8 +259,10 @@ public class testPanel extends JPanel implements MouseMotionListener,
 				b = new OutputBlock();
 			else if (newBlock.TYPE == BLOCKTYPE.VALUE)
 				b = new ValueBlock();
-			else
+			else if(newBlock.TYPE == BLOCKTYPE.IF)
 				b = new IfBlock();
+			else 
+				b = new PointBlock();
 			addBlock(b);
 			b.setLocation(e.getPoint());
 			newBlock.setColor(Color.black);
@@ -272,7 +274,7 @@ public class testPanel extends JPanel implements MouseMotionListener,
 		}
 
 		
-			deSelectBlocks();
+		deSelectBlocks();
 		
 	}
 	@Override

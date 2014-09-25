@@ -30,6 +30,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private int State=0;//1-is first 2 is next
 	public static DrawableBlock CurrentNote = null, firstBLock = null, SelectedBlock=null;
 
 	public static KeyListener keyListener;
@@ -120,7 +121,7 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 								 ActionEvent.CTRL_MASK));
 		
 		// Create a popup menu
-		if(!(TYPE.equals(BLOCKTYPE.BEGIN)||TYPE.equals(BLOCKTYPE.END))){
+		if(!(TYPE.equals(BLOCKTYPE.BEGIN)||TYPE.equals(BLOCKTYPE.END)||TYPE.equals(BLOCKTYPE.POINT))){
 			popupMenu.add(menuEdit);
 		
 			Log.log(TYPE);
@@ -386,5 +387,13 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 			firstBLock = null;
 		}
 	}
-	
+	public void setType(int i){
+		
+	}
+	public int getState() {
+		return State;
+	}
+	public void setState(int state) {
+		State = state;
+	}
 }

@@ -43,7 +43,7 @@ public class JythonFactory {
 		
 		String tempName = pathToJythonModule.substring(pathToJythonModule.lastIndexOf("/")+1);
 		tempName = tempName.substring(0, tempName.indexOf("."));
-		System.out.println(tempName);
+		Log.log(tempName);
 		String instanceName = tempName.toLowerCase();
 		String javaClassName = tempName.substring(0,1).toUpperCase() +
 				tempName.substring(1);
@@ -54,7 +54,7 @@ public class JythonFactory {
 			javaInt = 
 					interpreter.get(instanceName).__tojava__(JavaInterface);
 		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();  // Add logging here
+			Log.log(ex);  // Add logging here
 		}
 
 		return javaInt;

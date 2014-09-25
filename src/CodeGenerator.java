@@ -62,6 +62,17 @@ public class CodeGenerator {
 
 	String currentName;
 	int startLine;
+
+	/*
+	  This function skips over PointBlock. Because it's not used in the code
+	  generation
+	 */
+	private DrawableBlock nextBlock(DrawableBlock v) {
+		while (v != null && v.TYPE == BLOCKTYPE.POINT)
+			v = v.getNext();
+
+		return v;
+	}
 	
 	private void processBlock(DrawableBlock v, String globals) {
 
@@ -92,7 +103,6 @@ public class CodeGenerator {
 		
 		switch (v.TYPE) {
 		case BEGIN:
-			
 			break;
 		case IF:
 			IfBlock b = (IfBlock) v;
@@ -104,7 +114,7 @@ public class CodeGenerator {
 			boolean callFalse = true;
 			String trueName = "", falseName = "";
 			// if the statement is true
-			next = b.getNextTrue();
+			next = nextBlock(b.getNextTrue());
 			line.tab = 2;
 			if (block2name.containsKey(next)) {// check if we have visited there before
 				line.code = block2name.get(next) + "()";
@@ -121,7 +131,7 @@ public class CodeGenerator {
 			script.add(new LineCode(line));
 			
 			// if the statement is false
-			next = b.getNextFalse();
+			next = nextBlock(b.getNextFalse());
 			line.tab = 2;
 			if (block2name.containsKey(next)) {// check if we have visited there before
 				line.code = block2name.get(next) + "()";
@@ -136,12 +146,12 @@ public class CodeGenerator {
 
 			if (callTrue) {
 				currentName = trueName;
-				processBlock(b.getNextTrue(), globals);
+				processBlock(nextBlock(b.getNextTrue()), globals);
 			}
 
 			if (callFalse) {
 				currentName = falseName;
-				processBlock(b.getNextFalse(), globals);
+				processBlock(nextBlock(b.getNextFalse()), globals);
 			}
 			
 			break;
@@ -241,7 +251,7 @@ public class CodeGenerator {
 			break;
 		}
 
-		next = v.getNext();
+		next = nextBlock(v.getNext());
 		
 		if (v.TYPE != BLOCKTYPE.IF && v.TYPE != BLOCKTYPE.END) {
 			if (block2name.containsKey(next)) {

@@ -33,11 +33,11 @@ public class dragDrop implements MouseMotionListener,MouseListener,Serializable 
 				DrawableBlock.firstBLock.setColor(Color.red);
 			}
 		}else if(temp.TYPE==BLOCKTYPE.BEGIN||DrawableBlock.firstBLock.equals(temp)){
-			if(DrawableBlock.firstBLock.equals(temp)&&!temp.TYPE.equals(BLOCKTYPE.BEGIN)&&!temp.TYPE.equals(BLOCKTYPE.END))
+			if(DrawableBlock.firstBLock.equals(temp)&&!temp.TYPE.equals(BLOCKTYPE.POINT)&&!temp.TYPE.equals(BLOCKTYPE.BEGIN)&&!temp.TYPE.equals(BLOCKTYPE.END))
 				//DrawableBlock.CurrentNote=temp;
 				DrawableBlock.setSelectedBlock(null, null);
 			DrawableBlock.setCurrentBlock(temp, Color.green);
-			System.out.println("greeen");
+			Log.log("greeen");
 			DrawableBlock.firstBLock.setColor(DrawableBlock.firstBLock.getBeforeColor());
 			DrawableBlock.firstBLock=null;
 		}else{

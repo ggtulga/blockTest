@@ -43,7 +43,7 @@ public class ErrorCheck {
 
 		// if varname is okay, then check for declarations
 		if (ret == true) {
-			
+
 			if (varname.indexOf('[') != -1)
 				varname = varname.substring(0, varname.indexOf('['));
 
@@ -104,16 +104,18 @@ public class ErrorCheck {
 		if (visited.contains(v)) {
 			return ret;
 		}
-		
+
 		visited.add(v);
 
-		if (cont.equals("")) {
+		if (v.TYPE != BLOCKTYPE.POINT && cont.equals("")) {
 			errs.add(new ErrorMessage(6, current));
 			ret = true;
 		}
 
 		int s, f;
 		switch (v.TYPE) {
+		case POINT:
+			break;
 		case END:
 			foundEnd = true;
 			break;

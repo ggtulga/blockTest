@@ -10,7 +10,7 @@ import java.awt.event.KeyEvent;
 public  class MyDispacher implements KeyEventDispatcher {
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
-    	//System.out.println(e.getKeyChar());
+
     	if(e.getKeyCode()==KeyEvent.VK_DELETE&&DrawableBlock.getSelectedBlock()!=null){
     		testPanel c=(testPanel)DrawableBlock.getSelectedBlock().getParent();
     		DrawableBlock.CurrentNote=null;

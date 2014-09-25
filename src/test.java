@@ -178,7 +178,7 @@ public class test extends JFrame {
 			cc.setLocation(14, 0);
 			tools.add(cc);
 			cc = new ValueBlock(3);
-			// cc.setLocation(10,0);
+			cc.setLocation(10,0);
 			tools.add(cc);
 			cc = new OutputBlock(3);
 			cc.setLocation(18, 0);
@@ -189,6 +189,9 @@ public class test extends JFrame {
 			cc = new EndBlock(3);
 			cc.setLocation(15, 0);
 			tools.add(cc);
+			cc = new PointBlock(3);
+			cc.setLocation(40, 0);
+			tools.add(cc);
 			initTools();
 			
 			
@@ -196,7 +199,7 @@ public class test extends JFrame {
 		}
 		public void initTools(){
 			removeAll();
-			JPanel temp = new JPanel(new GridLayout(7, 1));
+			JPanel temp = new JPanel(new GridLayout(8, 1));
 			for (JComponent c : tools) {
 				c.addMouseListener(this);
 				c.addMouseMotionListener(null);
