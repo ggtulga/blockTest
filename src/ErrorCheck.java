@@ -208,7 +208,7 @@ public class ErrorCheck {
 						break;
 				}
 
-				String[] names = cont.split("<=|>=|==|<|>|!=|\\+|\\-|\\*|/|%");
+				String[] names = cont.split("<=|>=|==|<|>|!=|\\+|\\-|\\*|/|%|and|or|\\(|\\)");
 				Pattern p = Pattern.compile("=|<|>|!");
 
 				for (i = 0; i < names.length; i++) {
@@ -245,7 +245,7 @@ public class ErrorCheck {
 
 		case VALUE:
 			if (checkString(cont) == true) {
-				String[] vars = cont.split("=|\\+|\\-|\\*|/|%");
+				String[] vars = cont.split("=|\\+|\\-|\\*|/|%|\\(|\\)");
 				for (i = 0; i < vars.length; i++)
 					if (checkVarname(vars[i], true) == false)
 						ret = true;
