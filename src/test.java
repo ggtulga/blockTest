@@ -410,7 +410,7 @@ public class test extends JFrame {
 		}
 	}
 	private void newp(){
-		if(checkFileSaved()==1||FileEdited==' ')
+		if(checkFileSaved()==1 || FileEdited==' ')
 		{
 			mainPanel.newPanel();
 			currentFile=null;
@@ -423,7 +423,7 @@ public class test extends JFrame {
 	}
 	
 	private int checkFileSaved(){
-		if(FileEdited!=' '){
+		if(FileEdited != ' '){
 			String msg="Баримтыг хадгалах уу?";
 			if(currentFile!=null)
 				msg=currentFile.getName()+ "-д өөрчлөлт орсон байна. өөрчлөлтийг хадгалах уу?";
