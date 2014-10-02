@@ -28,7 +28,9 @@ public class JythonFactory {
 						throw (OutOfMemoryError) javaError;
 					} else if (javaError instanceof StackOverflowError) {
 						throw (StackOverflowError) javaError;
-					} 
+					} else if (javaError instanceof ArithmeticException) {
+						throw (ArithmeticException) javaError;
+					}
 					
 					// throw (Throwable) javaError;
 				}

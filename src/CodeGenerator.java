@@ -294,6 +294,10 @@ public class CodeGenerator {
 			Log.log(e);
 			errs.add(new ErrorMessage(13, null));
 			return false;
+		} catch (ArithmeticException e) {
+			Log.log(e);
+			errs.add(new ErrorMessage(16, null));
+			return false;
 		} catch (Exception e) {
 			Log.log(e);
 			Log.log(e.toString());

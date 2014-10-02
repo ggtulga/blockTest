@@ -140,7 +140,8 @@ public class test extends JFrame {
 		inputPanel=new JPanel(new FlowLayout());
 		
 		this.setMinimumSize(new Dimension(1000, 500));
-		this.setSize(1200, 700);
+		this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		// this.setSize(1000, 700);
 		this.add(jpMenuBar,BorderLayout.NORTH);
 		//this.add(result,BorderLayout.SOUTH);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
