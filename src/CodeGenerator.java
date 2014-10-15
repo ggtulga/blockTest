@@ -284,33 +284,15 @@ public class CodeGenerator {
 			"LoggerType", "logger.py");
 
 		PyList trace = new PyList();
-		try {
-			trace = logger.run_script(s);
-		} catch (OutOfMemoryError e) {
-			Log.log(e);
-			errs.add(new ErrorMessage(12, null));
-			return false;
-		} catch (StackOverflowError e) {
-			Log.log(e);
-			errs.add(new ErrorMessage(13, null));
-			return false;
-		} catch (ArithmeticException e) {
-			Log.log(e);
-			errs.add(new ErrorMessage(16, null));
-			return false;
-		} catch (Exception e) {
-			Log.log(e);
-			Log.log(e.toString());
-			Log.log(trace);
-			errs.add(new ErrorMessage(14, null));
-			return false;
-		}
+
+		trace = logger.run_script(s);
 
 		Log.log(trace);
 		int lineNumber;
 		boolean isEnded, isStarted;
 		isEnded = isStarted = false;
 		DrawableBlock v, pre = null;
+
 		for (Iterator<PyList> i = trace.iterator(); i.hasNext(); ) {
 			PyList list = (PyList) i.next();
 			lineNumber = Integer.parseInt(list.get(0).toString());
@@ -331,12 +313,7 @@ public class CodeGenerator {
 
 			v = script.get(lineNumber).v;
 			
-			if (v != null && pre != v) {
-				pre = v;
-
-				if (v.TYPE == BLOCKTYPE.END)
-					isEnded = true;
-				
+			if (v != null) {
 				BlockTrace t = new BlockTrace();
 				t.setBlock(v);
 			
@@ -345,15 +322,26 @@ public class CodeGenerator {
 
 				for (PyObject item : dict.iteritems().asIterable()) {
 					var = (PyTuple) item;
+					Log.log(var.get(0));
 					if (var.get(1) == null)
 						t.addVariable(var.get(0).toString(), "None");
-					else if (var.get(1).equals("__error_max_line__"))
+					else if (var.get(0).equals("__error_max_line__")) {
 						t.addVariable("Алдаа: ", "Хамгийн их хийж болох үйлдлийн хязгаар хүрлээ. Боломжит төгсгөлгүй давталтаас сэргийлэхийн тулд энд зогсож байна.");
-					else
+						isEnded = true;
+					} else if (var.get(0).equals("__error__")) {
+						isEnded = true;
+						t.addVariable("Алдаа: ", var.get(1).toString());
+					} else
 						t.addVariable(var.get(0).toString(), var.get(1).toString());
 				}
 
-				traces.add(t);
+				if (pre != v) {
+					if (v.TYPE == BLOCKTYPE.END)
+						isEnded = true;
+					pre = v;
+					traces.add(t);
+				} else if (isEnded)
+					traces.add(t);
 			}
 		}
 

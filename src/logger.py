@@ -8,7 +8,7 @@ import cStringIO
 import bdb
 import copy
 
-DEBUG = True
+DEBUG = False
 MAX_LINES = 500
 	
 IGNORE_VARS = set(('__init_array__', '__builtins__', 'sys', 'JOptionPane'))
@@ -39,8 +39,23 @@ class Logger(bdb.Bdb, LoggerType):
             self.run(script, user_globals, user_globals)
         except SystemExit:
             pass
+        except:
+            if DEBUG:
+                traceback.print_exc()
+                
+            (exc_type, exc_val, exc_tb) = sys.exc_info()
+            tb = exc_tb
+            while (tb.tb_next != None):
+                tb = tb.tb_next
 
-        # sys.stdout = old_stdout
+            entry = [tb.tb_lineno]
+            entry.append({'__error__' : type(exc_val).__name__ + ": " +  str(exc_val)})
+            
+            self.trace.append(entry)
+
+            
+        sys.stdout = old_stdout
+        # print self.trace
         return self.trace
         
         # for i in self.trace:
@@ -57,7 +72,8 @@ class Logger(bdb.Bdb, LoggerType):
         self.lineno = frame.f_lineno
 
         if len(self.trace) > MAX_LINES:
-            self.globals["__error_max_line__"] = True
+            self.globals['__error_max_line__'] = True
+            self.trace.append([self.lineno, dict.copy(self.globals)])
             raise bdb.BdbQuit
         
         for i, v in frame.f_globals.items():
@@ -74,7 +90,7 @@ class Logger(bdb.Bdb, LoggerType):
         self.trace.append([self.lineno, dict.copy(self.globals)])
         
             
-# file = open('tests/euclid.py', 'r')
+# file = open('../tests/inf.py', 'r')
 # data = file.read()
 
 # logger = Logger()
