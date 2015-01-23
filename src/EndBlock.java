@@ -10,13 +10,18 @@ public class EndBlock extends DrawableBlock {
 	private DrawableBlock before;
 	public EndBlock(){
 		super(BLOCKTYPE.END);
-		setText("End");
+		setTextValue("Төгсгөл");
 		//TYPE=BLOCKTYPE.END;
 		Log.log("--");
 		Log.log(TYPE);
 	}
-	public EndBlock(int i){
-		super(BLOCKTYPE.END,i);
+	public EndBlock(DrawableBlock b){
+		super(b);
+		setTextValue("Төгсгөл");
+	}
+	public EndBlock(int i, testPanel mainPanel){
+		super(BLOCKTYPE.END,i, mainPanel);
+		setTextValue("Төгсгөл");
 	}
 	@Override
 	public void draw(Graphics g) {
@@ -29,7 +34,7 @@ public class EndBlock extends DrawableBlock {
 				g.drawArc(this.getWidth()-30, 10, 25, 30, -90, 180);
 				g.drawLine(15, 10, getWidth()-15, 10);
 				g.drawLine(15, 40, getWidth()-15, 40);
-				g.drawString("Төгсгөл", 10, 30);
+				//g.drawString("Төгсгөл", 10, 30);
 				g.drawLine(getWidth()/2, 0, getWidth()/2, 10);
 				int x1[]={getWidth()/2-5,getWidth()/2,getWidth()/2+5};
 				int y1[]={3,10,3};

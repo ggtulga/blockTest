@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -30,6 +31,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -41,6 +43,8 @@ public class test extends JFrame {
 	private final static String TITLE = "Flow chart runner";
 	private static char FileEdited=' ';
 	private JFileChooser fileChooser;
+	private List<DrawableBlock> TempCopy;
+	private int pastCount=0;
 	testPanel mainPanel;
 	JList<String> inputList;
 	Map<String,String> inputs;
@@ -88,6 +92,7 @@ public class test extends JFrame {
 		FileNameExtensionFilter blockfilter = new FileNameExtensionFilter("block files (*.block)", "block");
 		fileChooser.setFileFilter(blockfilter);
 		jpMenuBar=new JPanel(new FlowLayout(FlowLayout.LEFT));
+		//jpMenuBar.add(new JTextField("fgdfgdfgffffffffffffffffff"));
 		JButton btnNew=new JButton("Шинэ файл");
 		btnNew.setFocusable(false);
 		btnNew.addActionListener(new ActionListener(){
@@ -128,13 +133,41 @@ public class test extends JFrame {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					DrawableBlock.setCurrentBlock(null, null);//CurrentNote = null;
 					checkAndRun();
 				}
 
 						
 			});
 		jpMenuBar.add(btnrun);
+		/*
+		  JButton btnCopy=new JButton("Copy");
+		  btnCopy.setToolTipText("ctrl+c");
+		  btnCopy.setFocusable(false);
+		  btnCopy.addActionListener(new ActionListener(){
+
+		  @Override
+		  public void actionPerformed(ActionEvent e) {
+		  checkAndRun();
+		  }
+
+						
+		  });
+		  jpMenuBar.add(btnCopy);
+		
+		  JButton btnPaste=new JButton("Paste");
+		  btnPaste.setToolTipText("ctrl+v");
+		  btnPaste.setFocusable(false);
+		  btnPaste.addActionListener(new ActionListener(){
+
+		  @Override
+		  public void actionPerformed(ActionEvent e) {
+		  checkAndRun();
+		  }
+
+						
+		  });
+		  jpMenuBar.add(btnPaste);
+		*/
 		
 		inputs=new HashMap<String, String>();
 		inputPanel=new JPanel(new FlowLayout());
@@ -172,26 +205,26 @@ public class test extends JFrame {
 			super();
 			setLayout(new GridLayout());
 			tools = new ArrayList<JComponent>();
-			JComponent cc = new InitBlock(3);
-			cc.setLocation(18, 0);
+			JComponent cc = new InitBlock(3,mainPanel);
+			cc.setLocation(43, 0);
 			tools.add(cc);
-			cc = new InputBlock(3);
-			cc.setLocation(14, 0);
+			cc = new InputBlock(3,mainPanel);
+			cc.setLocation(43, 0);
 			tools.add(cc);
-			cc = new ValueBlock(3);
-			cc.setLocation(10,0);
+			cc = new ValueBlock(3,mainPanel);
+			cc.setLocation(43,0);
 			tools.add(cc);
-			cc = new OutputBlock(3);
-			cc.setLocation(18, 0);
+			cc = new OutputBlock(3,mainPanel);
+			cc.setLocation(43, 0);
 			tools.add(cc);
-			cc = new IfBlock(3);
-			cc.setLocation(3, 0);
+			cc = new IfBlock(3,mainPanel);
+			cc.setLocation(13, 0);
 			tools.add(cc);
-			cc = new EndBlock(3);
-			cc.setLocation(15, 0);
+			cc = new EndBlock(3,mainPanel);
+			cc.setLocation(43, 0);
 			tools.add(cc);
-			cc = new PointBlock(3);
-			cc.setLocation(40, 0);
+			cc = new PointBlock(3,mainPanel);
+			cc.setLocation(78, 0);
 			tools.add(cc);
 			initTools();
 			
@@ -219,7 +252,7 @@ public class test extends JFrame {
 				BorderFactory.createLoweredBevelBorder(), "Блокууд");
 			title.setTitlePosition(TitledBorder.CENTER);
 			temp.setBorder(title);
-			temp.add(new JLabel("                                     "));
+			temp.add(new JLabel("                                                          "));
 			temp.setSize(100, 100);
 			this.add(temp);
 		}
@@ -367,6 +400,33 @@ public class test extends JFrame {
 			});
 		main_menu.add(menu_item);
 
+		  
+		menu_item = new JMenuItem("Copy");
+		menu_item.setMnemonic(KeyEvent.VK_C);
+		menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
+								ActionEvent.CTRL_MASK));
+		menu_item.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					copy();
+				}
+			});
+		main_menu.add(menu_item);
+		
+		menu_item = new JMenuItem("Paste");
+		menu_item.setMnemonic(KeyEvent.VK_V);
+		menu_item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
+								ActionEvent.CTRL_MASK));
+		menu_item.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					paste();
+				}
+			});
+		main_menu.add(menu_item);
+		
 		menu_item = new JMenuItem("Тухай");
 		menu_item.addActionListener(new ActionListener() {
 
@@ -461,6 +521,63 @@ public class test extends JFrame {
 			result.add(pnl, BorderLayout.SOUTH);
 			revalidate();
 			repaint();
+		}
+	}
+	private void copy(){
+		TempCopy=new ArrayList<DrawableBlock>();
+		List<DrawableBlock> blocks=testPanel.getSelectedBlocks();
+		if(blocks.size()>0){
+			DrawableBlock temp=null;
+			for (DrawableBlock block : blocks) {
+				
+				switch (block.TYPE) {
+				case END:
+					temp=new EndBlock(block);
+					TempCopy.add(temp);
+					break;
+				case IF:
+					temp=new IfBlock((IfBlock)block);
+					TempCopy.add(temp);
+					break;
+				case INIT:
+					temp=new InitBlock(block);
+					TempCopy.add(temp);
+					break;
+				case INPUT:
+					temp=new InputBlock(block);
+					TempCopy.add(temp);
+					break;
+				case VALUE:
+					temp=new ValueBlock(block);
+					TempCopy.add(temp);
+					break;
+				case OUTPUT:
+					temp=new OutputBlock(block);
+					TempCopy.add(temp);
+					break;
+				default:
+					break;			
+				}			
+			}
+			pastCount=0;
+		}
+		else
+			JOptionPane.showMessageDialog(this, "Та ямар нэгэн блок сонгоогүй байна","Мэдээлэл",JOptionPane.OK_OPTION);
+		
+	}
+	private void paste(){
+		pastCount++;
+		DrawableBlock temp=null;
+		if(TempCopy!=null&&TempCopy.size()>0){
+			for (DrawableBlock block : TempCopy) {
+				Point p=block.getLocation();
+				p.x=p.x+20*pastCount;
+				p.y=p.y+40*pastCount;
+				block.setLocation(p);
+				mainPanel.addBlock(block);				
+			}
+			mainPanel.setSelectedBlocks(TempCopy);
+			
 		}
 	}
 

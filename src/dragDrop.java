@@ -1,5 +1,6 @@
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -12,11 +13,12 @@ public class dragDrop implements MouseMotionListener,MouseListener,Serializable 
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-			
-		DrawableBlock tempNote=(DrawableBlock) e.getSource();
-		Point p =e.getLocationOnScreen();
-		tempNote.dragBlock(p);	
-		test.setEdited();
+		if(testPanel.getSelectedBlocks().size()==0){	
+			DrawableBlock tempNote=(DrawableBlock) e.getSource();
+			Point p =e.getLocationOnScreen();
+			tempNote.dragBlock(p);	
+			test.setEdited();
+		}
 	}
 	@Override
 	public void mouseMoved(MouseEvent e) {			
@@ -25,33 +27,31 @@ public class dragDrop implements MouseMotionListener,MouseListener,Serializable 
 	@Override
 	public void mouseClicked(MouseEvent e) {		
 		DrawableBlock temp=(DrawableBlock)e.getSource();
-		DrawableBlock.setCurrentBlock(null, null);
-		DrawableBlock.setSelectedBlock(temp, Color.orange);
-		if(DrawableBlock.firstBLock==null){
+		
+		
+		if(DrawableBlock.getFirstBLock()==null){
 			if(temp.TYPE!=BLOCKTYPE.END){
-				DrawableBlock.firstBLock=temp;
-				DrawableBlock.firstBLock.setColor(Color.red);
+				DrawableBlock.setFirstBLock(temp);
+				DrawableBlock.getFirstBLock().setColor(Color.red);
 			}
-		}else if(temp.TYPE==BLOCKTYPE.BEGIN||DrawableBlock.firstBLock.equals(temp)){
-			if(DrawableBlock.firstBLock.equals(temp)&&!temp.TYPE.equals(BLOCKTYPE.POINT)&&!temp.TYPE.equals(BLOCKTYPE.BEGIN)&&!temp.TYPE.equals(BLOCKTYPE.END))
-				//DrawableBlock.CurrentNote=temp;
+		}else if(temp.TYPE==BLOCKTYPE.BEGIN||DrawableBlock.getFirstBLock().equals(temp)){
 				DrawableBlock.setSelectedBlock(null, null);
-			DrawableBlock.setCurrentBlock(temp, Color.green);
-			Log.log("greeen");
-			DrawableBlock.firstBLock.setColor(DrawableBlock.firstBLock.getBeforeColor());
-			DrawableBlock.firstBLock=null;
+				
+			Log.log("green");
+			DrawableBlock.getFirstBLock().setColor(DrawableBlock.getFirstBLock().getBeforeColor());
+			DrawableBlock.setFirstBLock(null);
 		}else{
-			if(DrawableBlock.firstBLock.TYPE!=BLOCKTYPE.IF){
-				if(DrawableBlock.firstBLock.getNext()!=null){
+			if(DrawableBlock.getFirstBLock().TYPE!=BLOCKTYPE.IF){
+				if(DrawableBlock.getFirstBLock().getNext()!=null){
 					if(JOptionPane.showConfirmDialog(null,"Өмнөх холбоосыг устгах уу?", "Анхаар", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION)
-						DrawableBlock.firstBLock.setNext(temp);
+						DrawableBlock.getFirstBLock().setNext(temp);
 				}else
-					DrawableBlock.firstBLock.setNext(temp);
+					DrawableBlock.getFirstBLock().setNext(temp);
 				temp.repaint();
-				DrawableBlock.firstBLock.setColor(Color.black);
-				DrawableBlock.firstBLock=null;
+				DrawableBlock.getFirstBLock().setColor(Color.black);
+				DrawableBlock.setFirstBLock(null);
 			}else{
-				IfBlock block=(IfBlock)DrawableBlock.firstBLock;
+				IfBlock block=(IfBlock)DrawableBlock.getFirstBLock();
 				int t= JOptionPane.showConfirmDialog(null,"Хэрвээ үнэн гаралттай холбох бол Yes дарна уу!!!", "Үнэн гаралт эсэх", JOptionPane.YES_NO_OPTION);
 				if(t==JOptionPane.YES_OPTION)						
 					if(block.getNextTrue()!=null){
@@ -67,8 +67,8 @@ public class dragDrop implements MouseMotionListener,MouseListener,Serializable 
 						block.setNextFalse(temp);
 				temp.setColor(Color.black);
 				temp.repaint();
-				DrawableBlock.firstBLock.setColor(Color.black);
-				DrawableBlock.firstBLock=null;
+				DrawableBlock.getFirstBLock().setColor(Color.black);
+				DrawableBlock.setFirstBLock(null);
 				test.setEdited();
 			}
 		}			
@@ -78,31 +78,36 @@ public class dragDrop implements MouseMotionListener,MouseListener,Serializable 
 	public void mouseEntered(MouseEvent e) {
 
 		DrawableBlock block=(DrawableBlock)e.getSource();
-		if(!(DrawableBlock.firstBLock!=null&&DrawableBlock.firstBLock.equals(block)))
-			if(!(DrawableBlock.CurrentNote!=null&&DrawableBlock.CurrentNote.equals(block)))
-				if(!(DrawableBlock.SelectedBlock!=null&&DrawableBlock.SelectedBlock.equals(block)))
-					block.setColor(Color.blue);
+		if(!(DrawableBlock.getFirstBLock()!=null&&DrawableBlock.getFirstBLock().equals(block)))
+			if(!(DrawableBlock.getSelectedBlock()!=null&&DrawableBlock.getSelectedBlock().equals(block)))
+				block.setColor(Color.blue);
+		if(DrawableBlock.getFirstBLock()!=null)
+		{
+			block.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+		}
+		
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
 
 		DrawableBlock block=(DrawableBlock)e.getSource();
-		if(!(DrawableBlock.firstBLock!=null&&DrawableBlock.firstBLock.equals(block)))
-			if(!(DrawableBlock.CurrentNote!=null&&DrawableBlock.CurrentNote.equals(block)))
-				if(!(DrawableBlock.SelectedBlock!=null&&DrawableBlock.SelectedBlock.equals(block)))
-					block.setColor(Color.black);
+		if(!(DrawableBlock.getFirstBLock()!=null&&DrawableBlock.getFirstBLock().equals(block)))
+			if(!(DrawableBlock.getSelectedBlock()!=null&&DrawableBlock.getSelectedBlock().equals(block)))
+				block.setColor(Color.black);
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
 		DrawableBlock tempNote=(DrawableBlock) e.getSource();
 		tempNote.setTemp(null);
+		tempNote.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		DrawableBlock tempNote=(DrawableBlock) e.getSource();
 		tempNote.setTemp(null);
+		tempNote.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}		
 }

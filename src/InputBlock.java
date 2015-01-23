@@ -9,11 +9,14 @@ public class InputBlock  extends DrawableBlock{
 
 	public InputBlock (){
 		super(BLOCKTYPE.INPUT);
-		setText("");
+		setTextValue("        ");
 	}
-	public InputBlock(int i){
-		super(BLOCKTYPE.INPUT,i);
-		setText("Оруулах");
+	public InputBlock(int i, testPanel mainPanel){
+		super(BLOCKTYPE.INPUT,i, mainPanel);
+		setTextValue("Оруулах");
+	}
+	public InputBlock(DrawableBlock block) {
+		super(block);
 	}
 	@Override
 	public void draw(Graphics g) {
@@ -24,7 +27,7 @@ public class InputBlock  extends DrawableBlock{
 		g.fillPolygon(x, y, 4);
 		g.setColor(getColor());
 		g.drawPolygon(x, y, 4);
-		g.drawString(getText(), 10, 30);
+		//g.drawString(getText(), 10, 30);
 		g.drawLine(getWidth()/2, getHeight()-10, getWidth()/2, getHeight());
 		g.drawLine(getWidth()/2, 0, getWidth()/2, 10);
 		int x1[]={getWidth()/2-5,getWidth()/2,getWidth()/2+5};

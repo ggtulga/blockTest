@@ -6,12 +6,16 @@ import traceback
 import types
 import cStringIO
 import bdb
-import copy
 
 DEBUG = False
 MAX_LINES = 500
 	
 IGNORE_VARS = set(('__init_array__', '__builtins__', 'sys', 'JOptionPane'))
+
+def unshared_copy(inList):
+    if isinstance(inList, list):
+        return list( map(unshared_copy, inList) )
+    return inList
 
 class Logger(bdb.Bdb, LoggerType):
 
@@ -85,14 +89,8 @@ class Logger(bdb.Bdb, LoggerType):
             elif '__block_' in i:
                 continue    # exclude __init_array__ variable used for internal
             else:
-                self.globals[i] = copy.copy(v);
+                self.globals[i] = unshared_copy(v);
         
         self.trace.append([self.lineno, dict.copy(self.globals)])
         
-            
-# file = open('../tests/inf.py', 'r')
-# data = file.read()
-
-# logger = Logger()
-# print logger.run_script(data)
 

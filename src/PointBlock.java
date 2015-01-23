@@ -8,8 +8,8 @@ public class PointBlock extends DrawableBlock {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public PointBlock(int i) {
-		super(BLOCKTYPE.POINT,i);
+	public PointBlock(int i,testPanel mainPanel) {
+		super(BLOCKTYPE.POINT,i, mainPanel);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -21,6 +21,5 @@ public class PointBlock extends DrawableBlock {
 		g.setColor(getColor());
 		g.drawOval(1, 1, 20, 20);
 		g.fillOval(8, 8, 4, 4);
-		
 	}
 }

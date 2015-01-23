@@ -9,11 +9,11 @@ public class StartBlock extends DrawableBlock{
 
 	public StartBlock(){
 		super(BLOCKTYPE.BEGIN);
-		setText("");
+		setTextValue("");
 	}
-	public StartBlock(int i){
-		super(BLOCKTYPE.BEGIN,i);
-		setText("Start");
+	public StartBlock(int i,testPanel mainPanel){
+		super(BLOCKTYPE.BEGIN,i, mainPanel);
+		setTextValue("Start");
 	}
 	@Override
 	public void draw(Graphics g) {
