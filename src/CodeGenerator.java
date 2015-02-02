@@ -239,7 +239,7 @@ public class CodeGenerator {
 				if (v.TYPE == BLOCKTYPE.INPUT)
 					line.code = var[i] + "=int(JOptionPane.showInputDialog('" + var[i] + "'))";
 				else
-					line.code = "print(" + var[i] + ")";
+					line.code = "print " + var[i] + ",";
 
 				script.add(new LineCode(line));
 			}
