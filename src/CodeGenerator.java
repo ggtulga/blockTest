@@ -74,63 +74,6 @@ public class CodeGenerator {
 		return v;
 	}
 
-	// private String[] intelligentSplit(String s) {
-	// 	String[] exp = s.split(',');
-	// 	String[] ret;
-	// 	int i, x, y, ri;
-	// 	boolean merge = false;
-	// 	x = y = 0;
-	// 	for (k = 1, ri = 0; k < exp.length; k++) {
-	// 		for (i = 0; i < exp[k].length(); i++) {
-	// 			if (exp[k].charAt(i) == '\'') {
-	// 				x = i;
-	// 				while (true) {
-	// 					i = exp[k].indexOf('\'', i + 1);
-	// 					if (i == -1) {
-							
-	// 						break;
-	// 					} else if (cont.charAt(i - 1) != '\\') { // if it's escaped search again.
-	// 						y = i;
-	// 						break;
-	// 					}
-	// 				}
-	// 				if (isValid) {
-	// 					cont = cont.substring(0, x) + cont.substring(y + 1);
-	// 					i = 0;
-	// 				} else // if it's not valid, stop the search
-	// 					break;
-				
-	// 			} else if (cont.charAt(i) == '"') {
-	// 				x = i;
-	// 				while (true) {
-	// 					i = cont.indexOf('"', i + 1);
-	// 					if (i == -1) {
-	// 						errs.add(new ErrorMessage(5, current));
-	// 						isValid = false;
-	// 						break;
-	// 					} else if (cont.charAt(i - 1) != '\\') { // if it's escaped search again.
-	// 						y = i;
-	// 						break;
-	// 					}
-	// 				}
-
-	// 				if (isValid) {
-	// 					cont = cont.substring(0, x) + cont.substring(y + 1);
-	// 					i = 0;
-	// 				} else
-	// 					break;
-	// 			}
-	// 		}
-
-	// 	}
-
-	// 	if (isValid)
-	// 		return cont;
-	// 	else // return empty string if the string is not valid
-	// 		return "";
-
-	// }
-	
 	private void processBlock(DrawableBlock v, String globals) {
 
 		if (v == null)
@@ -282,19 +225,17 @@ public class CodeGenerator {
 
 			break;
 		case VALUE:
-			line.code = cont;
-			script.add(new LineCode(line));
-			
-			break;
 		case INPUT:
 		case OUTPUT:
-			String[] var = cont.split(",");
+			String[] var = cont.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
 			String substr;
 
 			for (i = 0; i < var.length; i++) {
 
 				if (v.TYPE == BLOCKTYPE.INPUT)
 					line.code = var[i] + "=int(JOptionPane.showInputDialog('" + var[i] + "'))";
+				else if (v.TYPE == BLOCKTYPE.VALUE)
+					line.code = var[i];
 				else
 					line.code = "print " + var[i] + ",";
 

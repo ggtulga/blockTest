@@ -474,9 +474,10 @@ public abstract class DrawableBlock extends JComponent implements ActionListener
 			JTextField source=(JTextField) arg0.getSource();
 			if (getText().equals("")) {
 				setTextValue("       ");
-			} else if (getText().trim().equals("") == false)
-				setTextValue(getText().trim());
-			
+			} 
+			//else if (getText().trim().equals("") == false)
+			// 	setTextValue(getText().trim());
+
 			source.setColumns(source.getText().length()+1);
 			revalidate();
 			repaint();
