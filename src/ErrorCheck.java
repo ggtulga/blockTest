@@ -2,6 +2,7 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ErrorCheck {
 
@@ -73,7 +74,7 @@ public class ErrorCheck {
 
 		return ret;
 	}
-
+	// removes any strings by the string with their quotes.
 	private String removeStrings(String cont) {
 		int i, x, y;
 		boolean isValid = true;
@@ -124,6 +125,45 @@ public class ErrorCheck {
 			return cont;
 		else // return empty string if the string is not valid
 			return "";
+	}
+
+	private boolean checkExpression(String exp) 
+	{
+		String[] vars = exp.split("=|\\+|\\-|\\*|/|%|\\(|\\)");
+		for (int i = 0; i < vars.length; i++)
+			if (checkVarname(vars[i], true, true) == false)
+				return false;
+		return true;
+	}
+
+	private boolean checkArrayIndex(String cont)
+	{
+		int s, f;
+		s = cont.indexOf('[');
+		while (s != -1) {
+			f = cont.indexOf(']');
+			String sub = cont.substring(s + 1, f);
+			cont = cont.substring(0, s) + cont.substring(f + 1);
+				
+			if (checkExpression(sub) == false) {
+				return false;
+			}
+			s = cont.indexOf('[');
+		}
+		return true;
+	}
+
+	private String removeArrayIndex(String cont) {
+		int s, f;
+		s = cont.indexOf('[');
+		while (s != -1) {
+			f = cont.indexOf(']');
+			cont = cont.substring(0, s) + cont.substring(f + 1);
+			
+			s = cont.indexOf('[');
+		}
+		return cont;
+
 	}
 
 	private boolean search(DrawableBlock v)
@@ -187,17 +227,24 @@ public class ErrorCheck {
 		case IF:
 		{
 			cont = removeStrings(cont);
-
-			String[] vars = cont.split("<=|>=|==|<|>|!=|\\+|\\-|\\*|/|%|\\(|\\)");
-			Pattern p = Pattern.compile("=|<|>|!");
+			// process arrays first, because array index
+			// can be an expression.
+			if (checkArrayIndex(cont) == false) {
+				errs.add(new ErrorMessage(17, current));
+				ret = true;
+			} else {
+				cont = removeArrayIndex(cont);
+				String[] vars = cont.split("<=|>=|==|<|>|!=|\\+|\\-|\\*|/|%|\\(|\\)");
+				Pattern p = Pattern.compile("=|<|>|!");
 			
-			for (i = 0; i < vars.length; i++) {
-				Matcher m = p.matcher(vars[i]);
-				if (m.find()) {
-					errs.add(new ErrorMessage(10, current));
-					ret = true;
-				} else if (checkVarname(vars[i], true, true) == false) 
-					ret = true;
+				for (i = 0; i < vars.length; i++) {
+					Matcher m = p.matcher(vars[i]);
+					if (m.find()) {
+						errs.add(new ErrorMessage(10, current));
+						ret = true;
+					} else if (checkVarname(vars[i], true, true) == false) 
+						ret = true;
+				}
 			}
 			
 			// If block returns here
@@ -215,25 +262,35 @@ public class ErrorCheck {
 		}
 		case INPUT:
 		{
-			String[] vars = removeStrings(cont).split(",");
-			for (i = 0; i < vars.length; i++) {
-				if (checkVarname(vars[i], true, false) == false)
-					ret = true;
+			cont = removeStrings(cont);
+			if (checkArrayIndex(cont) == false) {
+				errs.add(new ErrorMessage(17, current));
+				ret = true;
+			} else {
+				cont = removeArrayIndex(cont);
+				String[] vars = cont.split(",");
+				for (i = 0; i < vars.length; i++) {
+					if (checkVarname(vars[i], true, false) == false)
+						ret = true;
+				}
 			}
-
 			break;
 
 		}
 		case OUTPUT:
 		{
-			String[] outputs = removeStrings(cont).split(",");
+			cont = removeStrings(cont);
+			if (checkArrayIndex(cont) == false) {
+				errs.add(new ErrorMessage(17, current));
+				ret = true;
+			} else {
+				cont = removeArrayIndex(cont);
+				String[] outputs = cont.split(",");
 
-			for (i = 0; i < outputs.length; i++) {
-
-				String[] vars = outputs[i].split("=|\\+|\\-|\\*|/|%|\\(|\\)");
-				for (int j = 0; j < vars.length; j++)
-					if (checkVarname(vars[j], true, true) == false)
+				for (i = 0; i < outputs.length; i++) {
+					if (checkExpression(outputs[i]) == false)
 						ret = true;
+				}
 			}
 
 			break;
@@ -241,10 +298,19 @@ public class ErrorCheck {
 		case VALUE:
 
 			cont = removeStrings(cont);
-			String[] vars = cont.split("=|\\+|\\-|\\*|/|%|\\(|\\)");
-			for (i = 0; i < vars.length; i++)
-				if (checkVarname(vars[i], true, true) == false)
-					ret = true;
+			if (checkArrayIndex(cont) == false) {
+				Log.log("Array: " + cont);
+				errs.add(new ErrorMessage(17, current));
+				ret = true;
+			} else {
+				cont = removeArrayIndex(cont);
+				String[] exp = cont.split(",");
+				for (i = 0; i < exp.length; i++) {
+					if (checkExpression(exp[i]) == false)
+						ret = true;
+				}
+			}
+
 			break;
 		
 		}

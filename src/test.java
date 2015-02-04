@@ -133,6 +133,7 @@ public class test extends JFrame {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					save();
 					checkAndRun();
 				}
 
