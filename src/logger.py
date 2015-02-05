@@ -8,7 +8,7 @@ import cStringIO
 import bdb
 import re
 
-DEBUG = True
+DEBUG = False
 MAX_LINES = 500
 	
 IGNORE_VARS = set(('__init_array__', '__builtins__', 'sys', 'JOptionPane'))
@@ -50,9 +50,16 @@ class Logger(bdb.Bdb, LoggerType):
 
             (exc_type, exc_val, exc_tb) = sys.exc_info()
             exc = traceback.format_exception_only(exc_type, exc_val)
+            found = re.search(r'line\ ([0-9]*)', exc[0])
 
-            lineno = re.search(r'line\ ([0-9]*)', exc[0]).group(1)
-
+            if found == None:
+                while exc_tb.tb_next != None:
+                    exc_tb = exc_tb.tb_next
+                lineno = exc_tb.tb_lineno
+                exc = [type(exc_val).__name__, str(exc_val)]
+            else:
+                lineno = found.group(1)
+                
             entry = [lineno]
             entry.append({'__error__' : exc[1] })
             
@@ -60,7 +67,7 @@ class Logger(bdb.Bdb, LoggerType):
 
             
         sys.stdout = old_stdout
-        # print self.trace
+
         return self.trace
         
         # for i in self.trace:
@@ -94,7 +101,7 @@ class Logger(bdb.Bdb, LoggerType):
         
         self.trace.append([self.lineno, dict.copy(self.globals)])
         
-# file = open('../tests/err.py', 'r')
+# file = open('../tests/err1.py', 'r')
 # data = file.read()
 
 # logger = Logger()
