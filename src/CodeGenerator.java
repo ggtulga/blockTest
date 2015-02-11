@@ -233,11 +233,11 @@ public class CodeGenerator {
 			for (i = 0; i < var.length; i++) {
 
 				if (v.TYPE == BLOCKTYPE.INPUT)
-					line.code = var[i] + "=int(JOptionPane.showInputDialog('" + var[i] + "'))";
+					line.code = var[i].trim() + "=int(JOptionPane.showInputDialog('" + var[i] + "'))";
 				else if (v.TYPE == BLOCKTYPE.VALUE)
-					line.code = var[i];
+					line.code = var[i].trim();
 				else
-					line.code = "print " + var[i] + ",";
+					line.code = "print " + var[i].trim() + ",";
 
 				script.add(new LineCode(line));
 			}
